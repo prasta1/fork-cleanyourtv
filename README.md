@@ -40,16 +40,21 @@ step with screenshots from the TV. If you'd rather do it by hand, the pieces are
 A small native Android TV home screen (`com.gathin.tvhome`), built for sets with 1 GB of RAM:
 
 - Pitch-black background, like Apple TV 4K.
-- A dock at the bottom in a lighter rounded band with the four apps you choose. The shelf above
-  shows the focused dock app's name in large type with an ambient glow sampled from its banner.
-  Press Down and the dock slides up to reveal the rest of your apps in a grid.
-- One translucent glass highlight springs from tile to tile. The focused tile lifts and shows its
-  name.
-- Frosted pills top right: **Inputs** (a dropdown of HDMI ports, AV and Live TV), **Wi-Fi**
-  (shows the network name) and **Settings**. Greeting, a large thin clock and the date top left,
-  set in [Outfit](https://fonts.google.com/specimen/Outfit).
-- Deterministic D-pad navigation, last focused tile remembered, staggered entrance animation.
-  No blur, no video, no network, no background services.
+- A dock pinned to the bottom in a lighter rounded band, holding the apps you choose. It is its
+  own layer, not a row of the grid: it never scrolls and never loses its place.
+- The focused app's banner fills the screen as a backdrop, zoomed well past recognition so it reads
+  as a colour field rather than a logo, with a soft glow sampled from it. The app's name sits in
+  large type on the left, in one place and one size whether you are on the dock or in the grid.
+- Press Up from the dock to open the grid of your remaining apps; press Up again to the pills, and
+  Down to walk back. Every key moves one step, in the direction it points.
+- One translucent glass highlight travels from tile to tile. The focused tile lifts slightly.
+- Frosted pills top right: **Inputs** (a dropdown of HDMI ports, AV and Live TV), **Wi-Fi** and
+  **Settings**, with the network name as a readout beside them rather than as the Wi-Fi label. A
+  greeting, a large thin clock and the date sit top left, set in
+  [Outfit](https://fonts.google.com/specimen/Outfit).
+- Apps with no banner get a plate tinted from their own colour, so a mixed grid still reads as one
+  surface. Deterministic D-pad navigation, last focused tile remembered, staggered entrance
+  animation. No blur, no video, no network, no background services.
 
 Configure it in [`launcher/app/src/main/res/values/config.xml`](launcher/app/src/main/res/values/config.xml):
 dock order, hidden apps, Live TV package and columns. Build and install with

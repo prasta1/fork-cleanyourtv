@@ -5,27 +5,36 @@
     android:layout_height="match_parent"
     android:background="#FF000000">
 
-    <!-- Ambient glow in the colour of the focused dock app. -->
+    <!--
+      The hero stage. The focused app's own banner, dropped in at low opacity, is what fills the
+      screen instead of empty black. The two scrims sit over it so type stays legible and the dock
+      is seated rather than floating on top of artwork.
+    -->
+    <!--
+      No banner image behind the hero name. Every leanback banner is the app's logo on a field, so
+      scaled to fill the screen it reads as a watermark competing with the name rather than as
+      atmosphere, and no amount of zoom hides that. The ambient glow carries the app's colour
+      instead: same signal, no lettering.
+    -->
+    <View
+        android:id="@+id/scrimLeft"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
+
+    <!-- Ambient glow in the focused app's colour. Light spill, not a colour wash. -->
     <View
         android:id="@+id/ambient"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0" />
-
-    <!-- Top shelf: the focused dock app's name, positioned above the dock in code. -->
-    <TextView
-        android:id="@+id/heroName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="68dp"
         android:alpha="0"
-        android:textColor="#FFFFFFFF"
-        android:textSize="48sp"
-        android:fontFamily="@font/outfit"
-        android:fontVariationSettings="'wght' 300"
-        android:letterSpacing="-0.02"
-        android:includeFontPadding="false"
-        android:singleLine="true" />
+        android:importantForAccessibility="no" />
+
+    <View
+        android:id="@+id/scrimBottom"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:importantForAccessibility="no" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -50,9 +59,8 @@
                     android:id="@+id/greeting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textColor="#8CFFFFFF"
-                    android:textSize="12sp"
+                    android:textColor="#A6FFFFFF"
+                    android:textSize="13sp"
                     android:fontFamily="@font/outfit"
                     android:fontVariationSettings="'wght' 500"
                     android:letterSpacing="0.22"
@@ -74,7 +82,7 @@
                         android:textSize="52sp"
                         android:fontFamily="@font/outfit"
                         android:fontVariationSettings="'wght' 300"
-                        android:letterSpacing="-0.04"
+                        android:letterSpacing="-0.03"
                         android:includeFontPadding="false" />
 
                     <TextClock
@@ -87,7 +95,7 @@
                         android:format12Hour="a"
                         android:format24Hour=""
                         android:textColor="#B3FFFFFF"
-                        android:textSize="15sp"
+                        android:textSize="16sp"
                         android:fontFamily="@font/outfit"
                         android:fontVariationSettings="'wght' 500"
                         android:letterSpacing="0.08"
@@ -111,16 +119,20 @@
                         android:format12Hour="EEEE  d MMMM"
                         android:format24Hour="EEEE  d MMMM"
                         android:textColor="#A6FFFFFF"
-                        android:textSize="14sp"
+                        android:textSize="15sp"
                         android:fontFamily="@font/outfit"
                         android:fontVariationSettings="'wght' 400"
-                        android:letterSpacing="0.14"
+                        android:letterSpacing="0.12"
                         android:textAllCaps="true" />
                 </LinearLayout>
             </LinearLayout>
 
+            <!--
+              The network name is a readout, not a button. Keeping it out of the Wi-Fi pill stops the
+              pill changing width every minute and stops the label reading like an action.
+            -->
             <LinearLayout
-                android:id="@+id/topButtons"
+                android:id="@+id/topRight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
@@ -129,50 +141,136 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/netStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="18dp"
+                    android:maxWidth="220dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textColor="#A6FFFFFF"
+                    android:textSize="15sp"
+                    android:fontFamily="@font/outfit"
+                    android:fontVariationSettings="'wght' 400" />
+
+                <TextView
                     android:id="@+id/btnInputs"
                     style="@style/TopButton"
                     android:text="@string/inputs"
-                    android:drawableStart="@drawable/ic_input"
-                    android:nextFocusDown="@+id/grid" />
+                    android:drawableStart="@drawable/ic_input" />
 
                 <TextView
                     android:id="@+id/btnWifi"
                     style="@style/TopButton"
                     android:text="@string/wifi"
-                    android:drawableStart="@drawable/ic_wifi"
-                    android:nextFocusDown="@+id/grid" />
+                    android:drawableStart="@drawable/ic_wifi" />
 
                 <TextView
                     android:id="@+id/btnSettings"
                     style="@style/TopButton"
                     android:text="@string/settings"
-                    android:drawableStart="@drawable/ic_settings"
-                    android:nextFocusDown="@+id/grid" />
+                    android:drawableStart="@drawable/ic_settings" />
             </LinearLayout>
         </RelativeLayout>
 
-        <!-- The wrapper clips at the grid's edge; the grid itself must not clip so scaled tiles can overflow their cells. -->
+        <!--
+          The grid is clipped to this box, so a partially scrolled row can only ever be cut by the
+          grid's own edge, never by the screen edge below the dock.
+        -->
         <FrameLayout
+            android:id="@+id/gridHolder"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="10dp"
+            android:clipChildren="true"
+            android:clipToPadding="true">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/grid"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingTop="10dp"
-                android:paddingBottom="40dp"
-                android:clipToPadding="false"
                 android:clipChildren="false"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                android:alpha="0"
+                android:descendantFocusability="afterDescendants" />
+
+            <!--
+              A scrolled row is always cut by one of these edges. Fading it reads as "there is more
+              that way"; a hard slice reads as a rendering fault.
+            -->
+            <View
+                android:id="@+id/gridFadeTop"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_gravity="top"
+                android:importantForAccessibility="no" />
+
+            <View
+                android:id="@+id/gridFadeBottom"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_gravity="bottom"
+                android:importantForAccessibility="no" />
+        </FrameLayout>
+
+        <!--
+          One home for the focused app's name, in one type size, always in the same place. It never
+          moves between dock and grid, so focus changes never reflow the screen.
+        -->
+        <FrameLayout
+            android:id="@+id/heroHolder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="14dp"
+            android:paddingBottom="16dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <TextView
+                android:id="@+id/heroName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|bottom"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#FFFFFFFF"
+                android:textSize="56sp"
+                android:fontFamily="@font/outfit"
+                android:fontVariationSettings="'wght' 300"
+                android:letterSpacing="-0.02"
+                android:includeFontPadding="false" />
+        </FrameLayout>
+
+        <!--
+          The dock is a pinned layer, not row 0 of the grid. It never scrolls and never leaves.
+        -->
+        <FrameLayout
+            android:id="@+id/dockHolder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dock_band"
+            android:paddingTop="12dp"
+            android:paddingBottom="26dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/dock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:clipToPadding="false"
                 android:overScrollMode="never"
                 android:scrollbars="none"
                 android:descendantFocusability="afterDescendants" />
         </FrameLayout>
     </LinearLayout>
 
-    <!-- The single floating glass highlight that springs between tiles. -->
+    <!-- The single floating glass highlight that travels between tiles and dock. -->
     <com.gathin.tvhome.GlassView
         android:id="@+id/glass"
         android:layout_width="10dp"

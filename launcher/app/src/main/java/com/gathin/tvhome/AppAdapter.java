@@ -9,9 +9,10 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Outline;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.provider.Settings;
 import android.view.KeyEvent;
@@ -19,9 +20,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -35,16 +36,27 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * App tiles. The first {@link MainActivity#COLUMNS} positions are the pinned dock (favourites, fixed order),
- * the rest is alphabetical.
+ * App tiles, in two roles. {@link #MODE_DOCK} is the pinned shelf and holds only the favourites in
+ * dock order; {@link #MODE_GRID} holds everything else, alphabetically. Both render the same tile
+ * at the same size, so a pinned app and a listed app are the same object.
  */
 public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
 
-    interface TileListener {
-        void onTileFocused(int position, View card);
+    static final int MODE_DOCK = 0;
+    static final int MODE_GRID = 1;
 
-        /** Called for D-pad Up/Down on a tile. Return true when handled. */
-        boolean onTileVerticalKey(int position, int keyCode);
+    interface TileListener {
+        /** The tile at {@code position} in {@code mode} took focus. */
+        void onTileFocused(int mode, int position, View card);
+
+        /** D-pad Up/Down on a tile. Return true when handled. */
+        boolean onTileVerticalKey(int mode, int position, int keyCode);
+
+        /** D-pad Left/Right on a tile. Return true when handled. */
+        boolean onTileHorizontalKey(int mode, int position, int keyCode);
+
+        /** The focused tile's own bounds moved. Anything tracking it must follow. */
+        void onTileLaidOut(View card);
     }
 
     static final class Entry {
@@ -54,6 +66,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         final Drawable banner;
         final Drawable icon;
         int ambient;
+        int plate;
 
         Entry(String label, ComponentName component, Drawable banner, Drawable icon) {
             this.label = label;
@@ -65,20 +78,23 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     }
 
     static final float FOCUS_SCALE = 1.10f;
+    static final float RADIUS_DP = 16f;
+    /** Tile width in dp. Also used to centre the dock, so it must match item_app.xml. */
+    static final float TILE_W_DP = 180f;
 
     private final Context ctx;
     private final TileListener listener;
-    private final int dockSize;
+    private final int mode;
     /** Dock order (res/values/config.xml, dock_apps). */
     private final List<String> favourites;
     /** Never shown as tiles (res/values/config.xml, hidden_apps). */
     private final Set<String> hidden;
     private final List<Entry> items = new ArrayList<>();
 
-    AppAdapter(Context ctx, TileListener listener, int dockSize) {
+    AppAdapter(Context ctx, TileListener listener, int mode) {
         this.ctx = ctx;
         this.listener = listener;
-        this.dockSize = dockSize;
+        this.mode = mode;
         this.favourites = Arrays.asList(ctx.getResources().getStringArray(R.array.dock_apps));
         this.hidden = new HashSet<>(Arrays.asList(ctx.getResources().getStringArray(R.array.hidden_apps)));
     }
@@ -98,17 +114,24 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             String label = String.valueOf(ri.loadLabel(pm));
             fresh.add(new Entry(label, new ComponentName(pkg, ri.activityInfo.name), banner, icon));
         }
+
+        boolean dock = mode == MODE_DOCK;
         Collections.sort(fresh, (a, b) -> {
             int fa = favourites.indexOf(a.pkg), fb = favourites.indexOf(b.pkg);
-            if (fa >= 0 || fb >= 0) {
-                if (fa < 0) return 1;
-                if (fb < 0) return -1;
-                return Integer.compare(fa, fb);
+            boolean inA = fa >= 0, inB = fb >= 0;
+            if (inA || inB) {
+                if (!inA) return dock ? 1 : -1;
+                if (!inB) return dock ? -1 : 1;
+                return dock ? Integer.compare(fa, fb) : 0;   // grid sorts alphabetically below
             }
             return a.label.compareToIgnoreCase(b.label);
         });
+
         items.clear();
-        items.addAll(fresh);
+        for (Entry e : fresh) {
+            boolean isFavourite = favourites.contains(e.pkg);
+            if (isFavourite == dock) items.add(e);   // dock keeps favourites, grid keeps the rest
+        }
         notifyDataSetChanged();
     }
 
@@ -116,29 +139,36 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_app, parent, false);
-        return new Holder(v, listener);
+        if (mode == MODE_DOCK) {
+            // wrap_content, and no margins. A wrap_content item measures to the card width PLUS its
+            // margins, so margins made the item wider than the card it contains; the card's
+            // center_horizontal gravity then offset the card inside it, and the item and the card
+            // stopped sharing a coordinate space. The glass is placed from the card's window
+            // position, so it drifted off the painted tile by that offset. Spacing between dock tiles
+            // comes from the list's own layout, not from item margins.
+            ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            v.setLayoutParams(lp);
+        }
+        return new Holder(v, listener, mode);
     }
 
     @Override
     public void onBindViewHolder(@NonNull Holder h, int position) {
         Entry e = items.get(position);
-        h.name.setText(e.label);
-        h.name.setVisibility(position < dockSize ? View.INVISIBLE : View.VISIBLE);   // the dock has no labels
-        h.name.setAlpha(0f);
-        h.card.setScaleX(1f);
-        h.card.setScaleY(1f);
         if (e.banner != null) {
             h.banner.setImageDrawable(e.banner);
             h.banner.setVisibility(View.VISIBLE);
             h.icon.setVisibility(View.GONE);
-            h.label.setVisibility(View.GONE);
+            h.card.setBackgroundResource(R.drawable.tile_bg);
         } else {
+            // No banner: a plate tinted from the app's own colour, so a grid of mixed apps still
+            // reads as one surface instead of ragged dark holes between bright banners.
             h.banner.setImageDrawable(null);
             h.banner.setVisibility(View.GONE);
             h.icon.setImageDrawable(e.icon);
             h.icon.setVisibility(View.VISIBLE);
-            h.label.setText(e.label);
-            h.label.setVisibility(View.VISIBLE);
+            h.card.setBackground(plateDrawable(e));
         }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {
@@ -150,6 +180,34 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             }
             return true;
         });
+    }
+
+    /** The dark, hue-tinted plate behind a banner-less app's icon. Cached per entry. */
+    private Drawable plateDrawable(Entry e) {
+        GradientDrawable plate = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{shade(ambientColorAt(indexOf(e)), 0.62f, 0.34f),
+                        shade(ambientColorAt(indexOf(e)), 0.72f, 0.15f)});
+        plate.setCornerRadius(dp(RADIUS_DP));
+        plate.setStroke(Math.max(1, (int) dp(1)), shade(ambientColorAt(indexOf(e)), 0.5f, 0.34f));
+        return plate;
+    }
+
+    private int indexOf(Entry e) {
+        return items.indexOf(e);
+    }
+
+    private int dp(float v) {
+        return Math.round(v * ctx.getResources().getDisplayMetrics().density);
+    }
+
+    /** Keeps the hue, drops the value: a colour derived from an app, not the app's actual colour. */
+    private static int shade(int color, float satMul, float val) {
+        float[] hsv = new float[3];
+        Color.colorToHSV(color & 0x00FFFFFF | 0xFF000000, hsv);
+        hsv[1] = Math.min(1f, hsv[1] * satMul);
+        hsv[2] = val;
+        return Color.HSVToColor(hsv);
     }
 
     private void launch(Entry e) {
@@ -169,31 +227,38 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         return items.size();
     }
 
+    boolean isEmpty() {
+        return items.isEmpty();
+    }
+
     String labelAt(int position) {
         return position >= 0 && position < items.size() ? items.get(position).label : "";
     }
 
+    
+
     /** A vivid colour sampled from the app's banner (or icon), cached per entry. */
     int ambientColorAt(int position) {
-        if (position < 0 || position >= items.size()) return 0xFF444444;
+        if (position < 0 || position >= items.size()) return 0xFF4A4A52;
         Entry e = items.get(position);
         if (e.ambient == 0) e.ambient = vividColor(e.banner != null ? e.banner : e.icon);
         return e.ambient;
     }
 
     private static int vividColor(Drawable live) {
-        if (live == null) return 0xFF444444;
-        // Draw a private copy: changing the bounds of the drawable an ImageView shows would blank the tile.
-        Drawable d = live.getConstantState() != null ? live.getConstantState().newDrawable().mutate() : live;
-        Rect saved = new Rect(d.getBounds());
+        if (live == null) return 0xFF4A4A52;
+        // Draw a private copy: resizing the drawable an ImageView is showing would blank that tile.
+        Drawable.ConstantState cs = live.getConstantState();
+        Drawable d = cs != null ? cs.newDrawable().mutate() : live;
         int n = 12;
         Bitmap bmp = Bitmap.createBitmap(n, n, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(bmp);
+        Rect saved = new Rect(d.getBounds());
         d.setBounds(0, 0, n, n);
         d.draw(c);
         d.setBounds(saved);
         float[] hsv = new float[3];
-        int best = 0xFF444444;
+        int best = 0xFF4A4A52;
         float bestScore = -1f;
         long r = 0, g = 0, b = 0;
         for (int y = 0; y < n; y++) {
@@ -227,22 +292,18 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         final View card;
         final ImageView banner;
         final ImageView icon;
-        final TextView label;
-        final TextView name;
 
-        Holder(View v, TileListener listener) {
+        Holder(View v, TileListener listener, int mode) {
             super(v);
             card = v.findViewById(R.id.card);
             banner = v.findViewById(R.id.banner);
             icon = v.findViewById(R.id.icon);
-            label = v.findViewById(R.id.label);
-            name = v.findViewById(R.id.name);
 
             final float density = v.getResources().getDisplayMetrics().density;
-            final float radius = density * 16f;
+            final float radius = density * RADIUS_DP;
             card.setOutlineProvider(new ViewOutlineProvider() {
                 @Override
-                public void getOutline(View view, Outline outline) {
+                public void getOutline(View view, android.graphics.Outline outline) {
                     outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), radius);
                 }
             });
@@ -250,24 +311,34 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
 
             card.setOnKeyListener((view, keyCode, event) -> {
                 if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-                if (keyCode != KeyEvent.KEYCODE_DPAD_UP && keyCode != KeyEvent.KEYCODE_DPAD_DOWN) return false;
                 int pos = getBindingAdapterPosition();
-                return listener != null && pos != RecyclerView.NO_POSITION && listener.onTileVerticalKey(pos, keyCode);
+                if (pos == RecyclerView.NO_POSITION || listener == null) return false;
+                if (keyCode == KeyEvent.KEYCODE_DPAD_UP || keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
+                    return listener.onTileVerticalKey(mode, pos, keyCode);
+                }
+                if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                    return listener.onTileHorizontalKey(mode, pos, keyCode);
+                }
+                return false;
             });
 
             card.setOnFocusChangeListener((view, focused) -> {
                 float s = focused ? FOCUS_SCALE : 1.0f;
                 view.animate().scaleX(s).scaleY(s)
-                        .setDuration(focused ? 260 : 180)
-                        .setInterpolator(new OvershootInterpolator(focused ? 1.6f : 0f))
+                        .setDuration(focused ? 220 : 170)
+                        .setInterpolator(new OvershootInterpolator(focused ? 1.2f : 0f))
                         .start();
-                name.animate().alpha(focused ? 1f : 0f)
-                        .translationY(focused ? density * 4f : -density * 6f)
-                        .setDuration(220).start();
                 int pos = getBindingAdapterPosition();
                 if (focused && listener != null && pos != RecyclerView.NO_POSITION) {
-                    listener.onTileFocused(pos, view);
+                    listener.onTileFocused(mode, pos, view);
                 }
+            });
+
+            // A tile moves whenever its RecyclerView scrolls, re-lays out, or the dock's centring
+            // padding changes. None of those change the list's own bounds, so a listener on the list
+            // never hears about them and the highlight drifts off the tile it belongs to.
+            card.addOnLayoutChangeListener((changed, l, t, r, b, ol, ot, or, ob) -> {
+                if (listener != null && changed.isFocused()) listener.onTileLaidOut(changed);
             });
         }
     }

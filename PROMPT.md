@@ -42,17 +42,22 @@ Launcher
   Android TV launcher instead (Java, AndroidX RecyclerView, minSdk matching the TV, debug build is fine),
   install it over ADB, set it as the default home and disable the stock launcher. If several apps claim
   the HOME intent, set the default with `cmd package set-home-activity`.
-- Design, Apple TV 4K style: pitch black background; a dock row at the bottom of the screen inside a
-  slightly lighter rounded band holding the four apps I pick (ask me which, and the order); the rest of
-  the apps in a 4-column grid below that scrolls up when I press Down; one translucent "glass" highlight
-  that springs from tile to tile instead of per-tile borders; the focused tile scales up slightly and
-  shows its name underneath; above the dock, the focused dock app's name in large light type with an
-  ambient glow in a colour sampled from its banner; frosted pill buttons top right for Inputs, Wi-Fi
-  (showing the network name) and Settings; a greeting, a large thin clock and the date top left in a
+- Design, Apple TV 4K style: pitch black background; a dock pinned at the bottom of the screen inside a
+  slightly lighter rounded band holding the apps I pick (ask me which, and the order), which is its own
+  layer and never scrolls; the rest of the apps in a 4-column grid above the dock, which opens when I
+  press Up; one translucent "glass" highlight that travels from tile to tile instead of per-tile
+  borders; the focused tile scales up slightly; the focused app's name in large light type in one fixed
+  place on the left, whether it is a dock app or a grid app; that app's own banner filling the screen as
+  a backdrop, zoomed past recognition so it reads as colour rather than a logo, plus a soft ambient glow
+  sampled from it; apps with no banner get a plate tinted from their own colour; frosted pill buttons top
+  right for Inputs, Wi-Fi and Settings, with the network name as a readout beside them rather than as the
+  Wi-Fi label; a greeting, a large thin clock and the date top left in a
   downloaded open-licence typeface such as Outfit. Inputs opens a compact glass dropdown under the pill
   listing the HDMI ports, AV and Live TV, switching via the TV input framework.
-- Make D-pad navigation deterministic: Up/Down move exactly one row, Up from the dock goes to the top
-  bar, the ends of the top bar don't fall through to tiles. Remember the last focused tile.
+- Make D-pad navigation deterministic, and handle every direction yourself so the framework's spatial
+  focus search never picks a target: Up/Down move exactly one row, Up from the dock opens the grid,
+  Up from the grid's top row goes to the pills, Down walks back down, and the ends of the top bar don't
+  fall through to tiles. Remember the last focused tile in each zone.
 - Keep it light: the TV has about 1 GB of RAM. No blur, no video, no network polling.
 
 Verify
