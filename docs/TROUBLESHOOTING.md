@@ -5,6 +5,23 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
 
 ## Connecting
 
+- **Android 11+ moved network ADB off port 5555**, so "connect on 5555" is the wrong instruction for
+  a newer TV. Wireless debugging binds a random port that changes every time you toggle it, and it
+  requires TLS plus a one-time pairing handshake. How far you can get depends on the manufacturer,
+  and there are three distinct outcomes: 5555 absent; 5555 open but not completing the legacy
+  handshake (seen on a Sony K-85XR70, where paired wireless debugging was the working route); or
+  5555 still usable, in which case nothing else is needed.
+- **`tools/tv.py` cannot connect where only paired wireless debugging works.** Android 11 replaced
+  the plain transport with TLS, and `adb-shell` 0.4.4 — still the latest release — implements neither
+  `STLS` nor pairing. The symptom is `InvalidCommandError: Unknown command: 'STLS'`; it means the TV
+  is on the newer path, not that anything is misconfigured. Use the stock `adb` binary there. Where
+  `adb tcpip 5555` works (below) `tv.py` is fine, since that stays on the legacy plain transport.
+- **Pairing needs the dialog open, and two different ports.** Developer options → Wireless debugging
+  → *Pair device with pairing code*, then `adb pair <ip>:<pairing port> <code>` while that dialog is
+  up — the 6-digit code expires in about a minute. The pairing port is not the connect port, and the
+  connect port changes every time wireless debugging is toggled, so re-read it each session. `adb
+  mdns services` lists it when mDNS is not filtered off the network. Pairing registers the key so it
+  survives reboots; connecting does not.
 - **macOS: `adb connect` says "No route to host"** although the port is open. Recent macOS treats
   the Google-signed `adb` as its own app under Local Network privacy and silently blocks it.
   `tools/tv.py` avoids the binary entirely.
@@ -69,6 +86,9 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   `tools/tv.py 'ime set com.google.android.inputmethod.latin/com.android.inputmethod.latin.LatinIME'`
 - **Third-party launchers** often charge for basics like a custom wallpaper. That's why this repo
   has its own.
+- **The Sponsored slot on Google TV cannot be debloated.** On Android 12 and newer it lives inside
+  the launcher app rather than in a recommendation service, so the `tvrecommendations` packages that
+  disable it on older Google TV builds do not exist here. Replacing the launcher is the only route.
 - **Wrong time zone, clock off by 30 or 60 minutes**, seen on Xiaomi in Iran: the TV picked a
   neighbouring zone, and older firmware ships time zone data from before Iran dropped daylight
   saving in 2022 (on Android 10 and newer, check with

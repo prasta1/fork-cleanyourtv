@@ -19,6 +19,12 @@ do with screenshots pulled from the TV. Ask me before anything that depends on m
 
 Connect
 - Find the TV on my network (hostname, ARP table, or ask me for the IP) and connect over ADB on port 5555.
+- If port 5555 does not open, do not assume the IP is wrong. Ask which Android version it runs
+  (`adb shell getprop ro.build.version.sdk`); Android 11 and newer moved network ADB off 5555 onto a
+  random port reached through Wireless debugging, and paired wireless debugging needs two different
+  ports plus a one-time 6-digit code. If `tools/tv.py` reports `InvalidCommandError: Unknown command:
+  'STLS'` the TV is on that newer path: the Python client cannot speak it, so use the `adb` binary
+  instead and follow the pairing steps in docs/TROUBLESHOOTING.md.
 - If the stock adb binary fails with "No route to host" on macOS even though the port is open, that is
   macOS Local Network privacy blocking adb. Don't debug it: use the Python `adb-shell` package in a venv
   as the ADB client instead. If its file push hangs on larger files, transfer files as base64 chunks

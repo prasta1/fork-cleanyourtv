@@ -50,7 +50,7 @@ You need a computer on the same Wi-Fi as the TV and a coding assistant with shel
 
 | | |
 |---|---|
-| **1. On the TV** | Settings → Device Preferences → About → press OK on **Build** seven times → back → Developer options → **USB debugging** on. If you see a Network or ADB debugging toggle, turn that on too. Keep the TV on. |
+| **1. On the TV** | Settings → Device Preferences → About → press OK on **Build** seven times → back → Developer options → **USB debugging** on. If you see a Network or ADB debugging toggle, turn that on too. Keep the TV on. On Android 11+ there is also a **Wireless debugging** toggle, and it needs pairing once — see [Connecting](docs/TROUBLESHOOTING.md#connecting). |
 | **2. On your computer** | Paste [`PROMPT.md`](PROMPT.md) into your assistant and fill in your TV model. |
 | **3. Follow along** | Accept "Allow USB debugging?" on the TV, then answer the checklist: which apps you use, which four go in the dock, whether to keep the voice assistant, Chromecast and updates. |
 
@@ -196,6 +196,7 @@ The full list of things that bit us is in [docs/TROUBLESHOOTING.md](docs/TROUBLE
 three that matter most:
 
 - **macOS blocks `adb connect`** ("No route to host") under Local Network privacy. `tools/tv.py` avoids the binary.
+- **Android 11+ moved ADB off port 5555** and onto TLS plus pairing, which `tools/tv.py` cannot speak. On those sets use the `adb` binary. [Connecting](docs/TROUBLESHOOTING.md#connecting) has the three cases and how to tell them apart.
 - **Disable the stock launcher only after the new one is installed and running**, or Home lands on a factory test app. The install script orders this for you.
 - **On Google TV the setup wizard** (`com.google.android.tungsten.setupwraith`) can take Home and crash-loop the system after the stock launcher is disabled. Disable it too, and list it in your `debloat.txt` so restore brings it back. Stuck already? `tools/tv.py 'pm enable --user 0 com.google.android.apps.tv.launcherx'`.
 
