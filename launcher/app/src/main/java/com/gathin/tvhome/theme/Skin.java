@@ -129,7 +129,7 @@ public final class Skin {
 
     private void applyPill(TextView pill) {
         if (pill == null) return;
-        pill.setBackground(pillBackground);
+        pill.setBackground(own(pillBackground));
         pill.setTextColor(pillText);
         applyType(pill, tokens.pill);
         pill.setCompoundDrawableTintList(pillText);
@@ -145,7 +145,7 @@ public final class Skin {
     public void applyTile(View itemView) {
         View card = itemView.findViewById(R.id.card);
         if (card != null) {
-            card.setBackground(tileBackground);
+            card.setBackground(own(tileBackground));
             card.setClipToOutline(true);
         }
         text(itemView, R.id.label, tokens.textTileLabel, tokens.tileLabel);
@@ -154,7 +154,7 @@ public final class Skin {
 
     /** One row of the Inputs menu. Focus follows from the parent via duplicateParentState in XML. */
     public void applyInputRow(View row) {
-        row.setBackground(inputRowBackground);
+        row.setBackground(own(inputRowBackground));
         TextView title = row.findViewById(R.id.title);
         title.setTextColor(pillText);
         applyType(title, tokens.inputRowTitle);
@@ -164,7 +164,7 @@ public final class Skin {
         status.setTextColor(pillTextDim);
         applyType(status, tokens.inputRowStatus);
         View dot = row.findViewById(R.id.dot);
-        if (dot != null) dot.setBackground(statusDot);
+        if (dot != null) dot.setBackground(own(statusDot));
     }
 
     // ---- pieces other classes ask for -------------------------------------------------------------
@@ -219,6 +219,14 @@ public final class Skin {
         v.setTextSize(TypedValue.COMPLEX_UNIT_SP, spec.sizeSp);
         v.setFontVariationSettings("'wght' " + spec.weight);
         v.setLetterSpacing(spec.tracking);
+    }
+
+    /**
+     * A private copy of a shared drawable. A Drawable holds one set of bounds and one state, so
+     * handing the same instance to several views makes them overwrite each other's size and focus.
+     */
+    private static Drawable own(Drawable shared) {
+        return shared.getConstantState().newDrawable().mutate();
     }
 
     private static Drawable solid(int colour, float radius) {
