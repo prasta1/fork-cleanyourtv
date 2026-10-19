@@ -122,7 +122,9 @@ public final class Skin {
         View divider = root.findViewById(R.id.clockDivider);
         if (divider != null) divider.setBackgroundColor(tokens.clockDivider);
 
-        applyPill(root.findViewById(R.id.btnSettings));
+        for (int id : new int[]{R.id.btnInputs, R.id.btnWifi, R.id.btnSettings}) {
+            applyPill(root.findViewById(id));
+        }
     }
 
     private void applyPill(TextView pill) {

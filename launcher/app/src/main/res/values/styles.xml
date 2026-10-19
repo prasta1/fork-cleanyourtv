@@ -6,17 +6,17 @@
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 
-    <!-- Frosted pill, tvOS style, at half scale. Colours, height and type come from the active theme at runtime. -->
+    <!-- Frosted pill, tvOS style. Colours, height and type come from the active theme at runtime. -->
     <style name="TopButton">
         <item name="android:layout_width">wrap_content</item>
         <!-- Placeholder: the inflater requires a height; Skin.applyPill sets the real one from the theme. -->
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginStart">5dp</item>
-        <item name="android:paddingStart">8dp</item>
-        <item name="android:paddingEnd">10dp</item>
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">20dp</item>
         <item name="android:gravity">center</item>
         <item name="android:fontFamily">@font/outfit</item>
-        <item name="android:drawablePadding">4.5dp</item>
+        <item name="android:drawablePadding">9dp</item>
         <item name="android:focusable">true</item>
         <item name="android:clickable">true</item>
     </style>

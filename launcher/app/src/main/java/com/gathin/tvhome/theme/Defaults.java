@@ -64,9 +64,9 @@ public final class Defaults {
         // shape, dp
         t.tileRadius = 16f;
         t.dockBandRadius = 26f;
-        t.pillRadius = 10.5f;
-        t.pillHeight = 21f;
-        t.pillStrokeWidth = 0.5f;
+        t.pillRadius = 21f;
+        t.pillHeight = 42f;
+        t.pillStrokeWidth = 1f;
         t.glassRadius = 20f;
         t.glassStroke = 1.5f;
         t.glassInset = 6f;
@@ -100,7 +100,7 @@ public final class Defaults {
         t.date = new Tokens.TypeSpec(14f, 400, 0.14f);
         t.greeting = new Tokens.TypeSpec(12f, 500, 0.22f);
         t.hero = new Tokens.TypeSpec(48f, 300, -0.02f);
-        t.pill = new Tokens.TypeSpec(7.5f, 500, 0.01f);
+        t.pill = new Tokens.TypeSpec(15f, 500, 0.01f);
         t.tileName = new Tokens.TypeSpec(14f, 500, 0.02f);
         t.tileLabel = new Tokens.TypeSpec(13f, 400, 0f);
         t.inputRowTitle = new Tokens.TypeSpec(15f, 500, 0f);

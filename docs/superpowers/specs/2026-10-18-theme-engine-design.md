@@ -187,9 +187,9 @@ gain, and splitting them would break the existing behaviour where icons invert w
 |---|---|---|
 | `tileRadius` | `16dp` | `tile_bg.xml`, `AppAdapter.Holder` outline, `GlassView` |
 | `dockBandRadius` | `26dp` | `DockDecoration` |
-| `pillRadius` | `10.5dp` | `pill_bg.xml` |
-| `pillHeight` | `21dp` | `styles.xml` `TopButton` |
-| `pillStrokeWidth` | `0.5dp` | `pill_bg.xml` |
+| `pillRadius` | `21dp` | `pill_bg.xml` |
+| `pillHeight` | `42dp` | `styles.xml` `TopButton` |
+| `pillStrokeWidth` | `1dp` | `pill_bg.xml` |
 | `glassRadius` | `20dp` | `GlassView` |
 | `glassStroke` | `1.5dp` | `GlassView` rim |
 | `glassInset` | `6dp` | `GlassView`, and the matching pad in `MainActivity.onTileFocused` |
@@ -229,7 +229,7 @@ recreated. `entranceMs` is applied to the loaded `Animation` via `setDuration`, 
 | `date` | `14sp` | 400 | `0.14` | `activity_main.xml` |
 | `greeting` | `12sp` | 500 | `0.22` | `activity_main.xml` |
 | `hero` | `48sp` | 300 | `-0.02` | `activity_main.xml` |
-| `pill` | `7.5sp` | 500 | `0.01` | `styles.xml` `TopButton` |
+| `pill` | `15sp` | 500 | `0.01` | `styles.xml` `TopButton` |
 | `tileName` | `14sp` | 500 | `0.02` | `item_app.xml` |
 | `tileLabel` | `13sp` | 400 | `0` | `item_app.xml` |
 | `inputRowTitle` | `15sp` | 500 | `0` | `item_input.xml` |
@@ -366,9 +366,8 @@ differ from the pill's. `AppAdapter.FOCUS_SCALE` also stopped being a `static fi
 scale is now a theme decision. An `iconTint` token proposed in the chat was dropped, for the reason
 given in the colour section. The totals are 75 named tokens and 92 scalars.
 
-Merging `main`'s half-size, single-pill top bar changed the pill defaults above (height, radius and
-type halved) and added `pillStrokeWidth`: `Skin` had hard-coded the stroke at 1dp, which was a value
-the theme should own. That makes 76 named tokens and 93 scalars.
+`pillStrokeWidth` was added late: `Skin` had hard-coded the pill's stroke at 1dp, a value the theme
+should own. That makes 76 named tokens and 93 scalars.
 
 Two transcription errors were caught while writing `Defaults.java`, where the compiler rejected two
 hex literals that were ten digits rather than eight. `textGreeting` and `textTileName` have been

@@ -73,8 +73,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private int ambientColor;
     private boolean heroShown;
     private TextView greeting;
-    private TextView btnSettings;
-    private TextView menuWifiStatus;   // the Wi-Fi row's status text, only while the menu is open
+    private TextView btnWifi;
     private SpringAnimation springX, springY;
     private RecyclerView.OnScrollListener pendingScroll;
     private float glassTargetX, glassTargetY;
@@ -122,7 +121,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         ambient.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) ->
                 ambientGlow.setGradientRadius((r - l) * 0.62f));
         greeting = findViewById(R.id.greeting);
-        btnSettings = findViewById(R.id.btnSettings);
+        btnWifi = findViewById(R.id.btnWifi);
 
         grid = findViewById(R.id.grid);
         grid.setLayoutManager(new GridLayoutManager(this, COLUMNS));
@@ -159,16 +158,23 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         springY = new SpringAnimation(glass, DynamicAnimation.TRANSLATION_Y);
         applySprings();
 
-        btnSettings.setOnClickListener(v -> showMenu());
+        View btnInputs = findViewById(R.id.btnInputs);
+        View btnSettings = findViewById(R.id.btnSettings);
+        btnInputs.setOnClickListener(v -> showInputs());
+        btnWifi.setOnClickListener(v -> open(new Intent(Settings.ACTION_WIFI_SETTINGS)));
+        btnSettings.setOnClickListener(v -> open(new Intent(Settings.ACTION_SETTINGS)));
 
-        // The pill is alone in the top bar: Left, Right and Up all have nowhere to go, and Android's focus
-        // finder would otherwise jump to a tile far below.
-        btnSettings.setOnKeyListener((v, keyCode, event) -> {
+        // Keep focus on the top bar at its ends and at the top: Android's focus finder would otherwise
+        // jump to a tile far below when there is nothing in that direction.
+        View.OnKeyListener pillKeys = (v, keyCode, event) -> {
             if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-            return keyCode == KeyEvent.KEYCODE_DPAD_UP
-                    || keyCode == KeyEvent.KEYCODE_DPAD_LEFT
-                    || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT;
-        });
+            if (keyCode == KeyEvent.KEYCODE_DPAD_UP) return true;
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && v.getId() == R.id.btnInputs) return true;
+            return keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && v.getId() == R.id.btnSettings;
+        };
+        btnInputs.setOnKeyListener(pillKeys);
+        btnWifi.setOnKeyListener(pillKeys);
+        btnSettings.setOnKeyListener(pillKeys);
 
         // Hide the glass when focus leaves the tiles.
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalFocusChangeListener((oldF, newF) -> {
@@ -446,8 +452,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         greeting.setText(res);
     }
 
-    /** The Wi-Fi network name when we can read it, otherwise the connection type. */
-    private String networkLabel() {
+    /** Shows the Wi-Fi network name on the button when we can read it, otherwise the connection type. */
+    private void updateWifiLabel() {
         String text = getString(R.string.wifi);
         try {
             ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -468,13 +474,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         } catch (Exception ignored) {
         }
-        return text;
-    }
-
-    /** Keeps the menu's Wi-Fi row fresh while it is on screen. */
-    private void updateWifiLabel() {
-        if (menuWifiStatus == null) return;
-        menuWifiStatus.setText(networkLabel());
+        btnWifi.setText(text);
     }
 
     private void open(Intent i) {
@@ -486,54 +486,19 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
     }
 
-    /** The top bar's single pill: Settings, Wi-Fi and Inputs in one dropdown. Inputs opens its own list. */
-    private void showMenu() {
-        View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
-        panel.setBackground(skin.panelBackground());
-        LinearLayout rows = panel.findViewById(R.id.rows);
-        final PopupWindow popup = newPopup(panel);
-
-        addMenuRow(rows, popup, R.drawable.ic_settings, getString(R.string.settings), null,
-                () -> open(new Intent(Settings.ACTION_SETTINGS)));
-        menuWifiStatus = addMenuRow(rows, popup, R.drawable.ic_wifi, getString(R.string.wifi), networkLabel(),
-                () -> open(new Intent(Settings.ACTION_WIFI_SETTINGS)));
-        addMenuRow(rows, popup, R.drawable.ic_input, getString(R.string.inputs), null, this::showInputs);
-
-        popup.setOnDismissListener(() -> {
-            menuWifiStatus = null;
-            btnSettings.requestFocus();
-        });
-        dropDown(popup, panel, rows);
-    }
-
-    /** A row in the pill's menu. Returns its status view, for the caller to keep up to date. */
-    private TextView addMenuRow(LinearLayout rows, PopupWindow popup, int iconRes, String title,
-                                String status, Runnable action) {
-        View row = getLayoutInflater().inflate(R.layout.item_input, rows, false);
-        skin.applyInputRow(row);
-        ((ImageView) row.findViewById(R.id.icon)).setImageResource(iconRes);
-        ((TextView) row.findViewById(R.id.title)).setText(title);
-        TextView statusView = row.findViewById(R.id.status);
-        if (status == null) {
-            statusView.setVisibility(View.GONE);
-            row.findViewById(R.id.dot).setVisibility(View.GONE);
-        } else {
-            statusView.setText(status);
-        }
-        // Dismiss first, so a menu row that opens another list hands it the focus by itself.
-        row.setOnClickListener(v -> {
-            popup.dismiss();
-            action.run();
-        });
-        rows.addView(row);
-        return statusView;
-    }
-
-    /** Dropdown list under the pill: HDMI ports (with connection state), AV and Live TV. */
+    /** Dropdown menu under the Inputs pill: HDMI ports (with connection state), AV and Live TV. */
     private void showInputs() {
+        View anchor = findViewById(R.id.btnInputs);
         View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
         LinearLayout rows = panel.findViewById(R.id.rows);
-        final PopupWindow popup = newPopup(panel);
+
+        // Compact: as wide as the Inputs pill (a touch wider so "HDMI 1" fits), hanging right below it.
+        int width = Math.max(anchor.getWidth(), (int) (150 * density));
+        final PopupWindow popup = new PopupWindow(panel, width, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));   // needed for Back to dismiss
+        popup.setOutsideTouchable(true);
+        popup.setAnimationStyle(0);
+        popup.setElevation(0f);
 
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
         boolean sawNonHdmi = false;
@@ -569,31 +534,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             Toast.makeText(this, R.string.no_inputs, Toast.LENGTH_SHORT).show();
             return;
         }
-        dropDown(popup, panel, rows);
-    }
 
-    /**
-     * Panel wide enough for the longest row: icon, "HDMI 1", dot and "Connected" all on one line.
-     * The pill is too small to measure from now that it is half size, and the row title is weighted
-     * to fill the leftover space, so a panel narrower than this squeezes the title away entirely
-     * instead of ellipsizing it.
-     */
-    private PopupWindow newPopup(View panel) {
-        return new PopupWindow(panel, Math.max(btnSettings.getWidth(), (int) (220 * density)),
-                ViewGroup.LayoutParams.WRAP_CONTENT, true);
-    }
-
-    /** Fade and unfold the panel from under the pill, with the focus on its first row. */
-    private void dropDown(PopupWindow popup, View panel, LinearLayout rows) {
-        popup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));   // needed for Back to dismiss
-        popup.setOutsideTouchable(true);
-        popup.setAnimationStyle(0);
-        popup.setElevation(0f);
+        // Drop in: fade and unfold from the top edge.
         panel.setAlpha(0f);
         panel.setPivotY(0f);
         panel.setScaleY(0.92f);
         panel.setTranslationY(-8 * density);
-        popup.showAsDropDown(btnSettings, 0, (int) (10 * density), Gravity.START);
+        popup.showAsDropDown(anchor, 0, (int) (10 * density), Gravity.START);
         panel.animate().alpha(1f).scaleY(1f).translationY(0f).setDuration(220)
                 .setInterpolator(new android.view.animation.DecelerateInterpolator(1.6f)).start();
         rows.getChildAt(0).requestFocus();
