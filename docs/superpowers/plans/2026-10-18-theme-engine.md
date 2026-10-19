@@ -156,15 +156,29 @@ Both variants are **resolved at parse time**, so consumers never deal with a mis
 **Tests** `ThemeParserTest`
 
 - Full file with both variants → all values as written.
-- Partial dark variant (one colour) → that colour overridden, all 63 others equal to `Defaults.tokens()`.
+- Partial dark variant (one colour) → that colour overridden, all 66 others equal to `Defaults.tokens()`.
 - Malformed hex (`#GGGGGG`, `blue`) → default, no exception.
-- `#RGB` and `#ARGB` expand correctly.
+- `#RGB`, `#ARGB`, `#RRGGBB` and `#AARRGGBB` all expand as CSS and `Color.parseColor` do.
 - Missing `<light>` → `light` equals `dark`.
 - Missing `<dark>` → `dark` equals `light`.
 - Both missing → both equal defaults.
 - Unknown token name ignored, known tokens still applied.
-- Truncated/garbage XML → `parse` returns `null`.
-- Missing `label` → falls back to `id`.
+- Truncated / garbage / non-XML / empty input → `parse` returns `null`.
+- Missing `label` → falls back to `id`; missing `id` → falls back to the filename.
+
+**Three things this task turned up, none of them anticipated:**
+
+1. **A truncated theme file hung the parser.** `parseVariant` looped on `END_DOCUMENT`, which is
+   neither a start nor an end tag, so a half-written file would have spun forever — on the device,
+   at startup, on the home screen. The loop now returns null on end-of-document, and
+   `aTruncatedFileNeverHangs` pins it.
+2. **`#RRGGBB` must be read as opaque.** Six hex digits carry no alpha, and reading them literally
+   gives `0x00RRGGBB` — so a user writing the most natural colour format would have got a fully
+   transparent, invisible launcher. `#RGB` and `#000` keep CSS semantics, where the first digit is
+   the alpha.
+3. **A file must contain a complete `<theme>` element.** Otherwise an empty or non-XML file is
+   listed in the picker under its own filename. `parse` now tracks both the opening and the closing
+   tag.
 
 ---
 
