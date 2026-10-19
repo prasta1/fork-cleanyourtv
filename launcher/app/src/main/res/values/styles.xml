@@ -9,6 +9,8 @@
     <!-- Frosted pill, tvOS style. Colours and type come from the active theme at runtime. -->
     <style name="TopButton">
         <item name="android:layout_width">wrap_content</item>
+        <!-- Placeholder: the inflater requires a height; Skin.applyPill sets the real one from the theme. -->
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">10dp</item>
         <item name="android:paddingStart">16dp</item>
         <item name="android:paddingEnd">20dp</item>
