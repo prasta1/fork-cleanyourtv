@@ -103,6 +103,15 @@ screenshots pulled from the TV. With this repo as context it takes about fifteen
 And a TV that stops working against you: no sponsored rows, no "Discover" nags, no analytics
 phoning home, no apps you never asked for.
 
+### Themes
+
+Hold **OK** on the Settings pill and pick **Theme**: five ship in the APK (tvOS Black, Daylight,
+Ember, Mono, Nocturne), each with a light and a dark variant. The screen previews as you move, OK
+commits and Back reverts. With **System** selected the launcher follows the TV's day/night setting.
+The sun/moon button after the last row of apps flips the current theme between dark and light.
+To make your own, copy `launcher/app/src/main/assets/themes/tvos-black.xml`, edit it and rebuild.
+See [`docs/themes.md`](docs/themes.md).
+
 | | |
 |---|---|
 | ![The top shelf names the focused app over an ambient glow in its colour](docs/focus-2-up-netflix.png) | ![The Inputs popup: HDMI ports with what is connected, AV and Live TV](docs/inputs-menu.jpg) |
