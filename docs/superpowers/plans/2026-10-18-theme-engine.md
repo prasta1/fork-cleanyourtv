@@ -279,16 +279,22 @@ This is where the app starts reading tokens at runtime. The colour XML is still 
 Only now, with the runtime confirmed:
 
 - Delete `drawable/pill_bg.xml`, `pill_text.xml`, `pill_text_dim.xml`, `input_row_bg.xml`, `glass_panel.xml`, `tile_bg.xml`, `status_dot.xml`.
-- Strip `android:textColor` and `android:background` from `activity_main.xml` and `item_app.xml`; strip `android:textColor`, `android:background` and `android:drawableTint` from the `TopButton` style.
+- Strip `android:textColor` and `android:background` from `activity_main.xml` and `item_app.xml`; the `android:tint` / `android:textColor` / `android:background` references from `item_input.xml` and `popup_inputs.xml`; and `android:textColor`, `android:background`, `android:drawableTint`, `android:textSize`, `android:fontVariationSettings`, `android:letterSpacing` and `android:layout_height` from the `TopButton` style.
+- **Typography attributes go too, not just colours.** `textSize`, `letterSpacing` and
+  `fontVariationSettings` are tokens that `Skin` now sets on every one of those views, so leaving
+  them in XML would leave two sources of truth for the same value. `android:fontFamily` stays: the
+  typeface is not themed.
 - Leave the `ic_*.xml` fills alone — see the spec's colour section for why.
 
 **Verify** `assembleDebug` and re-screenshot. Then run the drift check:
 
 ```bash
-grep -rnE '#[0-9A-Fa-f]{6,8}' launcher/app/src/main/res launcher/app/src/main/java
+grep -rnE '(#[0-9A-Fa-f]{6,8}|0x[0-9A-Fa-f]{6,8})' launcher/app/src/main/res launcher/app/src/main/java \
+  | grep -vE '/theme/|Defaults\.java|ic_[a-z]+\.xml|outfit\.ttf'
 ```
 
-Only three kinds of hit may remain: `ic_*.xml` vector fills, `Defaults.java`, and the theme files under `assets/themes/`. Any other literal is a colour that escaped the engine.
+Only `0x00FFFFFF` alpha masks should remain — the `color & 0x00FFFFFF` masking in `GlassView` and
+`setAmbient` is a bit operation, not a colour. Any other literal is a value that escaped the engine.
 
 ---
 
