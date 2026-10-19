@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<theme id="daylight" label="Daylight">
+  <dark>
+    <color name="background">#FF14171F</color>
+    <color name="tileSurface">#FF222733</color>
+    <color name="dockBand">#FF1B1F2A</color>
+    <color name="dockBandEdge">#1AFFFFFF</color>
+    <color name="glassFillTop">#40D6E4FF</color>
+    <color name="glassFillBottom">#14D6E4FF</color>
+    <color name="glassRim">#CCD6E4FF</color>
+    <color name="glassGlow">#308FB4FF</color>
+    <color name="panelFillTop">#F2282D3A</color>
+    <color name="panelFillBottom">#F51A1E28</color>
+    <dimen name="tileRadius">18dp</dimen>
+    <dimen name="glassRadius">22dp</dimen>
+  </dark>
+  <light>
+    <color name="background">#FFFAFAF5</color>
+    <color name="tileSurface">#FFFFFFFF</color>
+    <color name="dockBand">#FFEDEDE6</color>
+    <color name="dockBandEdge">#1F3A3A30</color>
+    <color name="pillFillTop">#33FFFFFF</color>
+    <color name="pillFillBottom">#1AFFFFFF</color>
+    <color name="pillStroke">#2E3A3A30</color>
+    <color name="pillFocusFill">#F51F2A44</color>
+    <color name="inputRowFocus">#F51F2A44</color>
+    <color name="textHero">#FF1C2333</color>
+    <color name="textClock">#FF1C2333</color>
+    <color name="textAmPm">#A61C2333</color>
+    <color name="textDate">#991C2333</color>
+    <color name="textGreeting">#801C2333</color>
+    <color name="clockDivider">#2E1C2333</color>
+    <color name="textTileLabel">#FF1C2333</color>
+    <color name="textTileName">#F21C2333</color>
+    <color name="textPill">#FF1C2333</color>
+    <color name="textPillDim">#801C2333</color>
+    <color name="textPillFocus">#FFFFFFFF</color>
+    <color name="textPillFocusDim">#B3FFFFFF</color>
+    <color name="glassFillTop">#80D6E4FF</color>
+    <color name="glassFillBottom">#33D6E4FF</color>
+    <color name="glassSpecular">#CCFFFFFF</color>
+    <color name="glassRim">#B32F5DA8</color>
+    <color name="glassGlow">#402F5DA8</color>
+    <color name="statusDot">#FF1E8E3E</color>
+    <color name="separator">#1F1C2333</color>
+    <color name="panelFillTop">#F5FFFFFF</color>
+    <color name="panelFillBottom">#F5F1F1EA</color>
+    <color name="panelStroke">#1F1C2333</color>
+    <color name="pickerScrim">#40000000</color>
+    <integer name="ambientCore">72</integer>
+    <integer name="ambientEdge">28</integer>
+    <color name="ambientFallback">#FFD4D8E2</color>
+    <dimen name="tileRadius">18dp</dimen>
+    <dimen name="glassRadius">22dp</dimen>
+  </light>
+</theme>

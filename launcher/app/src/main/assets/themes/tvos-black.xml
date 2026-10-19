@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The reference theme. Its dark variant must equal Defaults.tokens() (DefaultsMatchShippedThemeTest).
+     Copy this file, change the id and label, edit values, rebuild. See docs/themes.md. -->
+<theme id="tvos-black" label="tvOS Black">
+  <dark>
+    <color name="background">#FF000000</color>
+    <color name="tileSurface">#FF1C1C1E</color>
+    <color name="dockBand">#FF141416</color>
+    <color name="dockBandEdge">#1FFFFFFF</color>
+    <color name="pillFillTop">#2EFFFFFF</color>
+    <color name="pillFillBottom">#14FFFFFF</color>
+    <color name="pillStroke">#38FFFFFF</color>
+    <color name="pillFocusFill">#F5FFFFFF</color>
+    <color name="inputRowFocus">#F5FFFFFF</color>
+    <color name="textHero">#FFFFFFFF</color>
+    <color name="textClock">#FFFFFFFF</color>
+    <color name="textAmPm">#B3FFFFFF</color>
+    <color name="textDate">#A6FFFFFF</color>
+    <color name="textGreeting">#8CFFFFFF</color>
+    <color name="clockDivider">#33FFFFFF</color>
+    <color name="textTileLabel">#FFFFFFFF</color>
+    <color name="textTileName">#F2FFFFFF</color>
+    <color name="textPill">#FFFFFFFF</color>
+    <color name="textPillDim">#73FFFFFF</color>
+    <color name="textPillFocus">#FF111111</color>
+    <color name="textPillFocusDim">#99111111</color>
+    <color name="glassFillTop">#3DFFFFFF</color>
+    <color name="glassFillBottom">#12FFFFFF</color>
+    <color name="glassSpecular">#66FFFFFF</color>
+    <color name="glassRim">#CCFFFFFF</color>
+    <color name="glassGlow">#30FFFFFF</color>
+    <color name="statusDot">#FF34C759</color>
+    <color name="separator">#1FFFFFFF</color>
+    <color name="panelFillTop">#F22A2A2E</color>
+    <color name="panelFillBottom">#F5161618</color>
+    <color name="panelStroke">#33FFFFFF</color>
+    <color name="pickerScrim">#40000000</color>
+    <integer name="ambientCore">92</integer>
+    <integer name="ambientEdge">38</integer>
+    <color name="ambientFallback">#FF444444</color>
+    <number name="ambientSaturation">1.1</number>
+    <number name="ambientValueFloor">0.5</number>
+    <dimen name="tileRadius">16dp</dimen>
+    <dimen name="dockBandRadius">26dp</dimen>
+    <dimen name="pillRadius">21dp</dimen>
+    <dimen name="pillHeight">42dp</dimen>
+    <dimen name="pillStrokeWidth">1dp</dimen>
+    <dimen name="glassRadius">20dp</dimen>
+    <dimen name="glassStroke">1.5dp</dimen>
+    <dimen name="glassInset">6dp</dimen>
+    <dimen name="panelRadius">20dp</dimen>
+    <dimen name="inputRowRadius">13dp</dimen>
+    <number name="springStiffness">260</number>
+    <number name="springDamping">0.58</number>
+    <number name="focusScale">1.10</number>
+    <number name="focusOvershoot">1.6</number>
+    <number name="entranceStagger">0.06</number>
+    <integer name="focusInMs">260</integer>
+    <integer name="focusOutMs">180</integer>
+    <integer name="glassInMs">180</integer>
+    <integer name="glassOutMs">160</integer>
+    <integer name="heroInMs">260</integer>
+    <integer name="heroOutMs">160</integer>
+    <integer name="heroSwapOutMs">120</integer>
+    <integer name="heroSwapInMs">200</integer>
+    <integer name="ambientInMs">600</integer>
+    <integer name="ambientOutMs">300</integer>
+    <integer name="ambientSwapOutMs">200</integer>
+    <integer name="ambientSwapInMs">500</integer>
+    <integer name="tileNameMs">220</integer>
+    <integer name="entranceMs">420</integer>
+    <text name="clock" size="52sp" weight="300" tracking="-0.04"/>
+    <text name="amPm" size="15sp" weight="500" tracking="0.08"/>
+    <text name="date" size="14sp" weight="400" tracking="0.14"/>
+    <text name="greeting" size="12sp" weight="500" tracking="0.22"/>
+    <text name="hero" size="48sp" weight="300" tracking="-0.02"/>
+    <text name="pill" size="15sp" weight="500" tracking="0.01"/>
+    <text name="tileName" size="14sp" weight="500" tracking="0.02"/>
+    <text name="tileLabel" size="13sp" weight="400" tracking="0"/>
+    <text name="inputRowTitle" size="15sp" weight="500" tracking="0"/>
+    <text name="inputRowStatus" size="11sp" weight="400" tracking="0.04"/>
+  </dark>
+  <light>
+    <color name="background">#FFF2F2F7</color>
+    <color name="tileSurface">#FFFFFFFF</color>
+    <color name="dockBand">#FFE5E5EA</color>
+    <color name="dockBandEdge">#1A000000</color>
+    <color name="pillFillTop">#14000000</color>
+    <color name="pillFillBottom">#0A000000</color>
+    <color name="pillStroke">#1F000000</color>
+    <color name="pillFocusFill">#F5111111</color>
+    <color name="inputRowFocus">#F5111111</color>
+    <color name="textHero">#FF000000</color>
+    <color name="textClock">#FF000000</color>
+    <color name="textAmPm">#99000000</color>
+    <color name="textDate">#8C000000</color>
+    <color name="textGreeting">#73000000</color>
+    <color name="clockDivider">#26000000</color>
+    <color name="textTileLabel">#FF111111</color>
+    <color name="textTileName">#F2111111</color>
+    <color name="textPill">#FF111111</color>
+    <color name="textPillDim">#73000000</color>
+    <color name="textPillFocus">#FFFFFFFF</color>
+    <color name="textPillFocusDim">#99FFFFFF</color>
+    <color name="glassFillTop">#66FFFFFF</color>
+    <color name="glassFillBottom">#26FFFFFF</color>
+    <color name="glassSpecular">#B3FFFFFF</color>
+    <color name="glassRim">#99000000</color>
+    <color name="glassGlow">#26000000</color>
+    <color name="statusDot">#FF248A3D</color>
+    <color name="separator">#1F000000</color>
+    <color name="panelFillTop">#F5FFFFFF</color>
+    <color name="panelFillBottom">#F5ECECF1</color>
+    <color name="panelStroke">#1F000000</color>
+    <color name="pickerScrim">#40000000</color>
+    <integer name="ambientCore">64</integer>
+    <integer name="ambientEdge">24</integer>
+    <color name="ambientFallback">#FFC7C7CC</color>
+  </light>
+</theme>
