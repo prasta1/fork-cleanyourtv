@@ -73,6 +73,14 @@ Tasks 2, 4 are independent of each other and can be done in either order. Everyt
 
 **Why the second dependency.** `ThemeParser` uses `org.xmlpull.v1`, which Android provides but the JDK does not implement. `xmlpull:xmlpull` puts an implementation on the unit-test classpath. If it fails to resolve, use `net.sf.kxml:kxml2:2.3.0` instead. The alternative — parsing with `DocumentBuilderFactory` — needs no dependency but allocates a whole DOM on a device with 1 GB of RAM, and this codebase cares about that.
 
+Both artifacts were confirmed to resolve from Maven Central on 2026-10-19.
+
+**On `CONTRIBUTING.md`'s "no new dependencies in the launcher without discussing it in an issue".**
+Both are `testImplementation`, so neither reaches the APK and neither affects the 1 GB target — the
+APK's dependency set is unchanged. This is worth a line in the PR description regardless. If a
+maintainer reads the rule as covering test dependencies too, the zero-dependency way out is to parse
+with `DocumentBuilderFactory` and accept the DOM cost; say so rather than discovering it in review.
+
 **Files**
 
 - `launcher/app/src/test/java/com/gathin/tvhome/theme/TokensTest.java` — placeholder asserting `Defaults.tokens()` is non-null. Replaced by real assertions in Task 2. Keeps the test source set wired from the start.
@@ -291,6 +299,11 @@ interface Host {
 
 **Verify** `assembleDebug`, install, and drive it over ADB with `tools/tv.py`: send `KEYCODE_DPAD_DOWN` repeatedly and screenshot after each to confirm live preview, then `KEYCODE_BACK` and confirm revert.
 
+`CONTRIBUTING.md` requires deterministic D-pad navigation tested "from every edge", so the picker
+must define and be tested for all four of its own edges: Up on the first row stays put, Down on the
+last row stays put, Left on the first column stays put, and Right on the last column stays put. None
+of them may escape the panel or fall through to the grid behind it.
+
 ---
 
 ## Task 10 — Day/night, persistence, Back
@@ -346,6 +359,8 @@ Only with a real TV. `TV_HOST=<ip> launcher/build-and-install.sh`, then work thr
 5. A system day/night flip re-themes live with no restart.
 6. A deliberately malformed theme file is skipped and the picker still lists the rest.
 7. Grid D-pad behaviour is unchanged before, during and after the picker.
+8. The picker's own four edges hold: Up/Down/Left/Right at each boundary stay put and never escape
+   the panel.
 
 Steps 6 and 7 are the ones that get skipped and then matter. For step 6, break a copy of a theme file, `adb push` it into `assets` via a rebuild, and confirm the picker still opens.
 
