@@ -67,6 +67,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView greeting;
     private TextView btnWifi;
     private SpringAnimation springX, springY;
+    private RecyclerView.OnScrollListener pendingScroll;
     private float glassTargetX, glassTargetY;
     private boolean glassShown;
     private int lastFocused = 0;
@@ -169,6 +170,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onResume() {
         super.onResume();
+        dropPendingScroll();
         glassShown = false;
         glass.setAlpha(0f);
         heroShown = false;
@@ -191,6 +193,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onPause() {
         super.onPause();
+        dropPendingScroll();
         handler.removeCallbacks(minuteTick);
     }
 
@@ -319,26 +322,65 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         return true;
     }
 
+    /**
+     * Left/Right move one tile, wrapping into the neighbouring row at a row edge. The dock row stops
+     * at its own ends so focus never falls off the row into the top bar or the empty grid margin.
+     */
+    @Override
+    public boolean onTileHorizontalKey(int position, int keyCode) {
+        int count = adapter.getItemCount();
+        if (count == 0) return true;
+        int target;
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+            if (position % COLUMNS == 0) {
+                if (position < COLUMNS) return true;       // far left of the dock: stay put
+                int above = position - COLUMNS;            // wrap to the last tile of the row above
+                target = above + Math.min(COLUMNS, count - above) - 1;
+            } else {
+                target = position - 1;
+            }
+        } else {
+            if (position % COLUMNS == COLUMNS - 1) {
+                if (position + 1 >= count) return true;    // far right of the grid: stay put
+                target = position + 1;                     // wrap to the first tile of the row below
+            } else {
+                target = position + 1;
+            }
+        }
+        focusTile(target);
+        return true;
+    }
+
     private void focusTile(int position) {
         if (adapter.getItemCount() == 0) return;
         final int pos = Math.max(0, Math.min(position, adapter.getItemCount() - 1));
         RecyclerView.ViewHolder vh = grid.findViewHolderForAdapterPosition(pos);
         if (vh != null) {
+            dropPendingScroll();
             vh.itemView.findViewById(R.id.card).requestFocus();
             return;
         }
-        // Not laid out yet: scroll there, then focus once the scroll settles.
-        grid.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        // Not laid out yet: scroll there, then focus once the scroll settles. Only one such request is
+        // ever in flight, so a run of key presses lands on the last target instead of an earlier one.
+        dropPendingScroll();
+        pendingScroll = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView rv, int newState) {
                 if (newState != RecyclerView.SCROLL_STATE_IDLE) return;
-                rv.removeOnScrollListener(this);
+                dropPendingScroll();
                 RecyclerView.ViewHolder h = rv.findViewHolderForAdapterPosition(pos);
                 View target = h != null ? h.itemView.findViewById(R.id.card) : rv.getChildAt(0);
                 if (target != null) target.requestFocus();
             }
-        });
+        };
+        grid.addOnScrollListener(pendingScroll);
         grid.smoothScrollToPosition(pos);
+    }
+
+    private void dropPendingScroll() {
+        if (pendingScroll == null) return;
+        grid.removeOnScrollListener(pendingScroll);
+        pendingScroll = null;
     }
 
     // ---- top bar ---------------------------------------------------------------------------------
