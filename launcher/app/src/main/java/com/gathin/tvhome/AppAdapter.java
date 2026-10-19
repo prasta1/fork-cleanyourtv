@@ -45,6 +45,9 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
 
         /** Called for D-pad Up/Down on a tile. Return true when handled. */
         boolean onTileVerticalKey(int position, int keyCode);
+
+        /** Called for D-pad Left/Right on a tile. Return true when handled. */
+        boolean onTileHorizontalKey(int position, int keyCode);
     }
 
     static final class Entry {
@@ -248,11 +251,26 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             });
             card.setClipToOutline(true);
 
+            // Android's own focus search cannot move between tiles: it only looks at focusable
+            // children of the focused view's ancestors, and a tile's root is not focusable (only
+            // the card inside it is). Left/Right therefore fell through to the absolute search,
+            // which just grabs the extreme tile in that direction. Every D-pad key is handled here
+            // instead, so each press moves exactly one tile.
             card.setOnKeyListener((view, keyCode, event) -> {
                 if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-                if (keyCode != KeyEvent.KEYCODE_DPAD_UP && keyCode != KeyEvent.KEYCODE_DPAD_DOWN) return false;
+                if (listener == null) return false;
                 int pos = getBindingAdapterPosition();
-                return listener != null && pos != RecyclerView.NO_POSITION && listener.onTileVerticalKey(pos, keyCode);
+                if (pos == RecyclerView.NO_POSITION) return false;
+                switch (keyCode) {
+                    case KeyEvent.KEYCODE_DPAD_UP:
+                    case KeyEvent.KEYCODE_DPAD_DOWN:
+                        return listener.onTileVerticalKey(pos, keyCode);
+                    case KeyEvent.KEYCODE_DPAD_LEFT:
+                    case KeyEvent.KEYCODE_DPAD_RIGHT:
+                        return listener.onTileHorizontalKey(pos, keyCode);
+                    default:
+                        return false;
+                }
             });
 
             card.setOnFocusChangeListener((view, focused) -> {
