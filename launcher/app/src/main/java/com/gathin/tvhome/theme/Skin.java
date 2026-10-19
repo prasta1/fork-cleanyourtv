@@ -76,7 +76,7 @@ public final class Skin {
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 new int[]{tokens.pillFillTop, tokens.pillFillBottom});
         pillRest.setCornerRadius(pillRadius);
-        pillRest.setStroke(Math.max(1, Math.round(dp(1f))), tokens.pillStroke);
+        pillRest.setStroke(Math.max(1, Math.round(dp(tokens.pillStrokeWidth))), tokens.pillStroke);
         pill.addState(NOT_FOCUSED, pillRest);
         pillBackground = pill;
 
@@ -122,9 +122,7 @@ public final class Skin {
         View divider = root.findViewById(R.id.clockDivider);
         if (divider != null) divider.setBackgroundColor(tokens.clockDivider);
 
-        for (int id : new int[]{R.id.btnInputs, R.id.btnWifi, R.id.btnSettings}) {
-            applyPill(root.findViewById(id));
-        }
+        applyPill(root.findViewById(R.id.btnSettings));
     }
 
     private void applyPill(TextView pill) {

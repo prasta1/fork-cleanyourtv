@@ -65,12 +65,13 @@ public final class Tokens {
     public float ambientSaturation;   // AppAdapter.vividColor boost applied to the sample
     public float ambientValueFloor;   // ...and the minimum value it is lifted to
 
-    // ---- shape (9), dp ----
+    // ---- shape (10), dp ----
 
     public float tileRadius;
     public float dockBandRadius;
     public float pillRadius;
     public float pillHeight;
+    public float pillStrokeWidth;
     public float glassRadius;
     public float glassStroke;
     public float glassInset;          // room for the glass glow
@@ -159,6 +160,7 @@ public final class Tokens {
         t.dockBandRadius = dockBandRadius;
         t.pillRadius = pillRadius;
         t.pillHeight = pillHeight;
+        t.pillStrokeWidth = pillStrokeWidth;
         t.glassRadius = glassRadius;
         t.glassStroke = glassStroke;
         t.glassInset = glassInset;

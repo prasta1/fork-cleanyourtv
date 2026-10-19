@@ -117,12 +117,12 @@ Rules:
 
 ## Token reference
 
-75 named tokens (92 scalar values). Every default below is the value currently hardcoded in the
+76 named tokens (93 scalar values). Every default below is the value currently hardcoded in the
 repo; no new visual knobs are introduced except `pickerScrim` and `entranceMs`, which cover
 surfaces that did not exist before this work.
 
-Counting the tables below: 32 colour + 5 ambient + 9 shape + 19 motion + 10 typography = 75 tokens,
-and 92 scalars once each typography token's `size`, `weight` and `tracking` are counted separately.
+Counting the tables below: 32 colour + 5 ambient + 10 shape + 19 motion + 10 typography = 76 tokens,
+and 93 scalars once each typography token's `size`, `weight` and `tracking` are counted separately.
 
 The colour table is exhaustive against the current code: extracting every `#RRGGBB` literal from
 `res/` and every `0xAARRGGBB` from `java/` accounts for all 32 entries, leaving only the icon
@@ -181,14 +181,15 @@ rows, exactly as `android:drawableTint="@drawable/pill_text"` does today. A dedi
 token was considered and dropped: it would have separated icon colour from label colour for no
 gain, and splitting them would break the existing behaviour where icons invert with their pill.
 
-### Shape (9)
+### Shape (10)
 
 | Token | Default | Currently in |
 |---|---|---|
 | `tileRadius` | `16dp` | `tile_bg.xml`, `AppAdapter.Holder` outline, `GlassView` |
 | `dockBandRadius` | `26dp` | `DockDecoration` |
-| `pillRadius` | `21dp` | `pill_bg.xml` |
-| `pillHeight` | `42dp` | `styles.xml` `TopButton` |
+| `pillRadius` | `10.5dp` | `pill_bg.xml` |
+| `pillHeight` | `21dp` | `styles.xml` `TopButton` |
+| `pillStrokeWidth` | `0.5dp` | `pill_bg.xml` |
 | `glassRadius` | `20dp` | `GlassView` |
 | `glassStroke` | `1.5dp` | `GlassView` rim |
 | `glassInset` | `6dp` | `GlassView`, and the matching pad in `MainActivity.onTileFocused` |
@@ -228,7 +229,7 @@ recreated. `entranceMs` is applied to the loaded `Animation` via `setDuration`, 
 | `date` | `14sp` | 400 | `0.14` | `activity_main.xml` |
 | `greeting` | `12sp` | 500 | `0.22` | `activity_main.xml` |
 | `hero` | `48sp` | 300 | `-0.02` | `activity_main.xml` |
-| `pill` | `15sp` | 500 | `0.01` | `styles.xml` `TopButton` |
+| `pill` | `7.5sp` | 500 | `0.01` | `styles.xml` `TopButton` |
 | `tileName` | `14sp` | 500 | `0.02` | `item_app.xml` |
 | `tileLabel` | `13sp` | 400 | `0` | `item_app.xml` |
 | `inputRowTitle` | `15sp` | 500 | `0` | `item_input.xml` |
@@ -364,6 +365,10 @@ one another's values was rejected outright), and the two Inputs-row type specs, 
 differ from the pill's. `AppAdapter.FOCUS_SCALE` also stopped being a `static final`, since focus
 scale is now a theme decision. An `iconTint` token proposed in the chat was dropped, for the reason
 given in the colour section. The totals are 75 named tokens and 92 scalars.
+
+Merging `main`'s half-size, single-pill top bar changed the pill defaults above (height, radius and
+type halved) and added `pillStrokeWidth`: `Skin` had hard-coded the stroke at 1dp, which was a value
+the theme should own. That makes 76 named tokens and 93 scalars.
 
 Two transcription errors were caught while writing `Defaults.java`, where the compiler rejected two
 hex literals that were ten digits rather than eight. `textGreeting` and `textTileName` have been
