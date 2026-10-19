@@ -472,9 +472,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         dropDown(popup, panel, rows);
     }
 
-    /** Compact panel, as wide as the pill (a touch wider so "HDMI 1" fits). */
+    /**
+     * Panel wide enough for the longest row: icon, "HDMI 1", dot and "Connected" all on one line.
+     * The pill is too small to measure from now that it is half size, and the row title is weighted
+     * to fill the leftover space, so a panel narrower than this squeezes the title away entirely
+     * instead of ellipsizing it.
+     */
     private PopupWindow newPopup(View panel) {
-        return new PopupWindow(panel, Math.max(btnSettings.getWidth(), (int) (150 * density)),
+        return new PopupWindow(panel, Math.max(btnSettings.getWidth(), (int) (220 * density)),
                 ViewGroup.LayoutParams.WRAP_CONTENT, true);
     }
 
