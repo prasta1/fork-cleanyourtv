@@ -117,14 +117,19 @@ Rules:
 
 ## Token reference
 
-64 named tokens (80 scalar values). Every default below is the value currently hardcoded in the
+67 named tokens (83 scalar values). Every default below is the value currently hardcoded in the
 repo; no new visual knobs are introduced except `pickerScrim` and `entranceMs`, which cover
 surfaces that did not exist before this work.
 
-Counting the tables below: 30 colour + 4 ambient + 9 shape + 13 motion + 8 typography = 64 tokens,
-and 80 scalars once each typography token's `size`, `weight` and `tracking` are counted separately.
+Counting the tables below: 32 colour + 5 ambient + 9 shape + 13 motion + 8 typography = 67 tokens,
+and 83 scalars once each typography token's `size`, `weight` and `tracking` are counted separately.
 
-### Colour (30) and ambient (4)
+The colour table is exhaustive against the current code: extracting every `#RRGGBB` literal from
+`res/` and every `0xAARRGGBB` from `java/` accounts for all 32 entries, leaving only the icon
+vector fills untokenised (see below) and the two transparent stops that are derived rather than
+themed.
+
+### Colour (32) and ambient (5)
 
 | Token | Default | Currently in |
 |---|---|---|
@@ -141,9 +146,10 @@ and 80 scalars once each typography token's `size`, `weight` and `tracking` are 
 | `textClock` | `#FFFFFFFF` | `activity_main.xml` `clock` |
 | `textAmPm` | `#B3FFFFFF` | `activity_main.xml` `ampm` |
 | `textDate` | `#A6FFFFFF` | `activity_main.xml` `date` |
-| `textGreeting` | `#8CFFFFFFFF` | `activity_main.xml` `greeting` |
+| `textGreeting` | `#8CFFFFFF` | `activity_main.xml` `greeting` |
+| `clockDivider` | `#33FFFFFF` | `activity_main.xml`, the hairline between clock and date |
 | `textTileLabel` | `#FFFFFFFF` | `item_app.xml` `label` |
-| `textTileName` | `#F2FFFFFFFF` | `item_app.xml` `name` |
+| `textTileName` | `#F2FFFFFF` | `item_app.xml` `name` |
 | `textPill` | `#FFFFFFFF` | `drawable/pill_text.xml` |
 | `textPillDim` | `#73FFFFFF` | `drawable/pill_text_dim.xml` |
 | `textPillFocus` | `#FF111111` | `drawable/pill_text.xml` focused |
@@ -155,6 +161,9 @@ and 80 scalars once each typography token's `size`, `weight` and `tracking` are 
 | `glassGlow` | `#30FFFFFF` | `GlassView` outer glow |
 | `statusDot` | `#FF34C759` | `drawable/status_dot.xml` |
 | `separator` | `#1FFFFFFF` | `MainActivity.addSeparator` |
+| `panelFillTop` | `#F22A2A2E` | `drawable/glass_panel.xml` gradient |
+| `panelFillBottom` | `#F5161618` | `drawable/glass_panel.xml` gradient |
+| `panelStroke` | `#33FFFFFF` | `drawable/glass_panel.xml` outline |
 | `ambientCore` | alpha `#5C` | `MainActivity.setAmbient` |
 | `ambientEdge` | alpha `#26` | `MainActivity.setAmbient` |
 | `ambientFallback` | `#FF444444` | `AppAdapter.ambientColorAt` |
@@ -328,12 +337,23 @@ Manual checklist on device:
 
 ## Notes on the review
 
-Two token counts in the chat review were corrected while writing this spec: the shape set is 9
-tokens, not 7 (`dockBandRadius` and `inputRowRadius` were undercounted), and `entranceMs` was
-missing from the motion list. An `iconTint` token proposed in the chat was dropped on review, for
-the reason given in the colour section. The totals are 64 named tokens and 80 scalars.
+Three token counts in the chat review were wrong and are corrected here: the shape set is 9 tokens,
+not 7 (`dockBandRadius` and `inputRowRadius` were undercounted); `entranceMs` was missing from the
+motion list; and the colour set was undercounted by four — `clockDivider`, `panelFillTop`,
+`panelFillBottom` and `panelStroke` were all missed, which would have left a light theme with a
+near-black Inputs panel outlined in white. An `iconTint` token proposed in the chat was also
+dropped, for the reason given in the colour section. The totals are 67 named tokens and 83 scalars.
+
+Two transcription errors were caught while writing `Defaults.java`, where the compiler rejected two
+hex literals that were ten digits rather than eight. `textGreeting` and `textTileName` have been
+corrected from `#8CFFFFFFFF` and `#F2FFFFFFFF` to `#8CFFFFFF` and `#F2FFFFFF`.
 
 Two further ambiguities were resolved during the self-review rather than left open: `follow_system`
 is a boolean distinct from `theme_id` (so "System" means "keep this theme and track day/night", not
 a theme id called `system`), and `VariantResolver` exists as a separate pure class specifically so
 the light/dark rules can be tested without Android.
+
+Finally, the chat review claimed the token list was derived from the existing code. It had been
+compiled by eye. `TokensTest.tokenCountMatchesTheDocumentedSet` plus a mechanical extraction of
+every colour literal in `res/` and `java/` now back that claim, and the count assertion fails the
+build whenever a token is added or removed so this table cannot quietly drift again.
