@@ -169,7 +169,7 @@ themed.
 | `ambientFallback` | `#FF444444` | `AppAdapter.ambientColorAt` |
 | `ambientSaturation` | `1.1` | `AppAdapter.vividColor` |
 | `ambientValueFloor` | `0.5` | `AppAdapter.vividColor` |
-| `pickerScrim` | `#CC000000` | new — the picker's backdrop |
+| `pickerScrim` | `#40000000` | new — the picker's backdrop; light, because the screen behind it is the live preview |
 
 The ambient glow's third gradient stop is transparent in the source colour, and `GlassView`'s
 specular gradient ends at transparent; both are derived from the token rather than themed

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The theme picker's overlay. Colours come from the active theme; ThemePicker fills the rows. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <LinearLayout
+        android:id="@+id/panel"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="110dp"
+        android:layout_marginEnd="56dp"
+        android:orientation="vertical"
+        android:padding="6dp" />
+</FrameLayout>

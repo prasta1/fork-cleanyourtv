@@ -195,6 +195,27 @@ public final class Skin {
         if (dot != null) dot.setBackground(own(statusDot));
     }
 
+    /**
+     * One row of the theme picker: the Inputs row's look, with the committed choice marked by a small
+     * square. A drawn square rather than a check glyph, because Outfit may not carry the codepoint and
+     * a missing glyph on a TV is a tofu box.
+     *
+     * @param row       an inflated {@code item_input} row
+     * @param committed whether this row is the choice currently saved
+     */
+    public void applyPickerRow(View row, boolean committed) {
+        applyInputRow(row);
+        row.findViewById(R.id.icon).setVisibility(View.GONE);
+        row.findViewById(R.id.status).setVisibility(View.GONE);
+        View mark = row.findViewById(R.id.dot);
+        GradientDrawable square = new GradientDrawable();
+        square.setColor(0xFFFFFFFF);                 // only a shape: the tint supplies the colour, following the row's focus state
+        square.setCornerRadius(dp(2f));
+        mark.setBackground(square);
+        mark.setBackgroundTintList(pillText);
+        mark.setVisibility(committed ? View.VISIBLE : View.INVISIBLE);
+    }
+
     // ---- pieces other classes ask for -------------------------------------------------------------
 
     public ColorStateList pillText() {

@@ -186,6 +186,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private ThemeCatalog catalog;
     private ThemeStore store;
     private DockDecoration dockDecoration;
+    private ThemePicker picker;
+    private int gridFocusability;     // restored when the picker closes
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     /** Refreshes the network pill when the connection changes: at boot Wi-Fi often connects after Home is shown. */
@@ -427,6 +429,23 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         btnInputs = findViewById(R.id.btnInputs);
         View btnSettings = findViewById(R.id.btnSettings);
         btnInputs.setOnClickListener(v -> showInputs());
+        picker = new ThemePicker(this, root, skin, catalog, store, new ThemePicker.Host() {
+            @Override
+            public void applyTokens(Tokens t) {
+                applyTheme(t);
+            }
+
+            @Override
+            public boolean isNight() {
+                return isNightMode();
+            }
+
+            @Override
+            public void onPickerClosed() {
+                grid.setDescendantFocusability(gridFocusability);
+                btnSettings.requestFocus();
+            }
+        });
         btnWifi.setOnClickListener(v -> openNetworkPill());
         btnWifi.setOnLongClickListener(v -> {
             open(systemIntent(Settings.ACTION_WIFI_SETTINGS));
@@ -473,6 +492,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         // Hide the glass when focus leaves the tiles.
         getWindow().getDecorView().getViewTreeObserver().addOnGlobalFocusChangeListener((oldF, newF) -> {
+            if (picker.isOpen()) return;      // the glass stays up so the picker can preview it
             boolean onTile = newF != null && newF.getId() == R.id.card;
             if (!onTile) hideGlass();
         });
@@ -678,6 +698,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         stopAmbientAnimation();
         heroName.animate().cancel();
         ambient.animate().cancel();
+        picker.cancel();                  // a preview must not outlive the screen it was shown on
         handler.removeCallbacks(minuteTick);
         stopStats();
         if (diya != null) diya.stop();
@@ -913,7 +934,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     public void onBackPressed() {
-        // Home screen: Back goes nowhere.
+        // Home screen: Back goes nowhere, except out of the theme picker.
+        picker.cancel();
     }
 
     // ---- glass highlight -------------------------------------------------------------------------
@@ -1922,6 +1944,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     // ---- launcher settings and module cards -------------------------------------------------------
 
     /** Keep a normal Settings click for the TV; the launcher's choices live behind hold OK. */
+    /** Opens the theme picker; the grid is blocked from focus so the D-pad stays in the panel. */
+    private void openThemePicker() {
+        gridFocusability = grid.getDescendantFocusability();
+        grid.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+        picker.open();
+    }
+
     private void showSettingsMenu() {
         View anchor = findViewById(R.id.btnSettings);
         View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
@@ -1932,6 +1961,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 new Intent(this, LauncherSettingsActivity.class), LAUNCHER_SETTINGS_REQUEST));
         if (moduleCards) addSettingsMenuRow(rows, popup, R.string.module_cards, this::showModuleCards);
         addSettingsMenuRow(rows, popup, R.string.reorder, this::toggleReorder);
+        addSettingsMenuRow(rows, popup, R.string.theme, this::openThemePicker);
         panel.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         popup.setWidth(Math.max((int) (200 * density), panel.getMeasuredWidth()));
         // Hebrew puts Settings at the left of the header: grow the menu inward from it.

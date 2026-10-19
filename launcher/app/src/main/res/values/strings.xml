@@ -4,6 +4,7 @@
     <string name="inputs">Inputs</string>
     <string name="wifi">Wi-Fi</string>
     <string name="settings">Settings</string>
+    <string name="theme_system">System</string>
     <string name="choose_input">Inputs</string>
     <string name="connected">Connected</string>
     <string name="standby">Standby</string>
@@ -72,6 +73,7 @@
     <string name="reorder_hint">OK picks up an app, arrows move it, Back places it. Back again to finish.</string>
     <string name="reorder_not_saved">Couldn\'t save the new order</string>
     <string name="app_library">App library</string>
+    <string name="theme">Theme</string>
     <string name="toggle_dark_light">Switch between dark and light</string>
     <string name="library_empty">No launchable apps found</string>
     <string name="library_on_home">On Home</string>
