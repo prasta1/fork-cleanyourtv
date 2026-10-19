@@ -18,7 +18,7 @@ import java.lang.reflect.Field;
 public class TokensTest {
 
     /** Every token, across colour, ambient, shape, motion and typography. */
-    private static final int TOKEN_COUNT = 67;
+    private static final int TOKEN_COUNT = 73;
 
     @Test
     public void tokenCountMatchesTheDocumentedSet() {

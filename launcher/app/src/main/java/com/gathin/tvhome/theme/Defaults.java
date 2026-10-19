@@ -82,9 +82,15 @@ public final class Defaults {
         t.focusOutMs = 180;
         t.glassInMs = 180;
         t.glassOutMs = 160;
-        t.heroMs = 260;
-        t.heroSwapMs = 120;
-        t.ambientMs = 600;
+        t.heroInMs = 260;
+        t.heroOutMs = 160;
+        t.heroSwapOutMs = 120;
+        t.heroSwapInMs = 200;
+        t.ambientInMs = 600;
+        t.ambientOutMs = 300;
+        t.ambientSwapOutMs = 200;
+        t.ambientSwapInMs = 500;
+        t.tileNameMs = 220;
         t.entranceMs = 420;
 
         // typography

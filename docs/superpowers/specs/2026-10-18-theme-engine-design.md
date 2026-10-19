@@ -117,12 +117,12 @@ Rules:
 
 ## Token reference
 
-67 named tokens (83 scalar values). Every default below is the value currently hardcoded in the
+68 named tokens (84 scalar values). Every default below is the value currently hardcoded in the
 repo; no new visual knobs are introduced except `pickerScrim` and `entranceMs`, which cover
 surfaces that did not exist before this work.
 
-Counting the tables below: 32 colour + 5 ambient + 9 shape + 13 motion + 8 typography = 67 tokens,
-and 83 scalars once each typography token's `size`, `weight` and `tracking` are counted separately.
+Counting the tables below: 32 colour + 5 ambient + 9 shape + 14 motion + 8 typography = 68 tokens,
+and 84 scalars once each typography token's `size`, `weight` and `tracking` are counted separately.
 
 The colour table is exhaustive against the current code: extracting every `#RRGGBB` literal from
 `res/` and every `0xAARRGGBB` from `java/` accounts for all 32 entries, leaving only the icon
@@ -195,7 +195,7 @@ gain, and splitting them would break the existing behaviour where icons invert w
 | `panelRadius` | `20dp` | `drawable/glass_panel.xml` |
 | `inputRowRadius` | `13dp` | `drawable/input_row_bg.xml` |
 
-### Motion (13)
+### Motion (14)
 
 | Token | Default | Currently in |
 |---|---|---|
@@ -211,6 +211,7 @@ gain, and splitting them would break the existing behaviour where icons invert w
 | `heroSwapMs` | `120` | `MainActivity.showHero` |
 | `ambientMs` | `600` | `MainActivity.showHero` |
 | `entranceStagger` | `0.06` | `MainActivity` layout animation |
+| `tileNameMs` | `220` | `AppAdapter.Holder`, the name under a focused tile |
 | `entranceMs` | `420` | `res/anim/tile_enter.xml` |
 
 `AppAdapter.FOCUS_SCALE` ceases to be a `static final` and is read from tokens, since focus scale is
@@ -341,8 +342,10 @@ Three token counts in the chat review were wrong and are corrected here: the sha
 not 7 (`dockBandRadius` and `inputRowRadius` were undercounted); `entranceMs` was missing from the
 motion list; and the colour set was undercounted by four — `clockDivider`, `panelFillTop`,
 `panelFillBottom` and `panelStroke` were all missed, which would have left a light theme with a
-near-black Inputs panel outlined in white. An `iconTint` token proposed in the chat was also
-dropped, for the reason given in the colour section. The totals are 67 named tokens and 83 scalars.
+near-black Inputs panel outlined in white. A fifth was missed during implementation, when
+`tileNameMs` had to be added rather than fudging the tile-name animation out of other tokens' values.
+An `iconTint` token proposed in the chat was also dropped, for the reason given in the colour
+section. The totals are 68 named tokens and 84 scalars.
 
 Two transcription errors were caught while writing `Defaults.java`, where the compiler rejected two
 hex literals that were ten digits rather than eight. `textGreeting` and `textTileName` have been

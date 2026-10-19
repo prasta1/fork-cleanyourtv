@@ -9,22 +9,35 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gathin.tvhome.theme.Skin;
+
 /** Draws the tvOS style lighter band behind the first (dock) row and adds a gap below it. */
 public class DockDecoration extends RecyclerView.ItemDecoration {
 
     private final int dockSize;
     private final float density;
+    private final Skin skin;
     private final Paint band = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint edge = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
 
-    DockDecoration(int dockSize, float density) {
+    DockDecoration(int dockSize, float density, Skin skin) {
         this.dockSize = dockSize;
         this.density = density;
-        band.setColor(0xFF141416);
+        this.skin = skin;
         edge.setStyle(Paint.Style.STROKE);
         edge.setStrokeWidth(density);
-        edge.setColor(0x1FFFFFFF);
+        applyColours();
+    }
+
+    private void applyColours() {
+        band.setColor(skin.tokens().dockBand);
+        edge.setColor(skin.tokens().dockBandEdge);
+    }
+
+    /** Re-reads the theme after a change. */
+    void retheme() {
+        applyColours();
     }
 
     @Override
@@ -60,7 +73,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         if (!any) return;
         float pad = 14 * density;
         rect.inset(-pad, -pad);
-        float radius = 26 * density;
+        float radius = skin.dp(skin.tokens().dockBandRadius);
         c.drawRoundRect(rect, radius, radius, band);
         c.drawRoundRect(rect, radius, radius, edge);
     }

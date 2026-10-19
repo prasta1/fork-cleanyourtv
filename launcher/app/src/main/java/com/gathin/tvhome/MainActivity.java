@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
@@ -24,6 +25,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.FrameLayout;
@@ -39,6 +41,12 @@ import androidx.dynamicanimation.animation.SpringAnimation;
 import androidx.dynamicanimation.animation.SpringForce;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.gathin.tvhome.theme.Skin;
+import com.gathin.tvhome.theme.ThemeCatalog;
+import com.gathin.tvhome.theme.ThemeStore;
+import com.gathin.tvhome.theme.Tokens;
+import com.gathin.tvhome.theme.VariantResolver;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,6 +80,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private int lastFocused = 0;
     private float density;
 
+    private Skin skin;
+    private ThemeCatalog catalog;
+    private ThemeStore store;
+    private DockDecoration dockDecoration;
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final Runnable minuteTick = new Runnable() {
         @Override
@@ -90,10 +103,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         COLUMNS = Math.max(1, getResources().getInteger(R.integer.columns));
         liveTvPkg = getString(R.string.live_tv_package).trim();
 
+        catalog = new ThemeCatalog(this);
+        store = new ThemeStore(this, catalog);
+        skin = new Skin(this).retheme(store.current(isNightMode()));
+
         root = findViewById(R.id.root);
         glass = findViewById(R.id.glass);
         ambient = findViewById(R.id.ambient);
         heroName = findViewById(R.id.heroName);
+        skin.applyScreen(this, root);
+        glass.retheme(skin.tokens());
         ambientGlow = new GradientDrawable();
         ambientGlow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
         ambientGlow.setGradientCenter(0.32f, 0.42f);
@@ -107,10 +126,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.setLayoutManager(new GridLayoutManager(this, COLUMNS));
         grid.setHasFixedSize(true);
         grid.setItemAnimator(null);
-        grid.addItemDecoration(new DockDecoration(COLUMNS, density));
-        grid.setLayoutAnimation(new LayoutAnimationController(
-                AnimationUtils.loadAnimation(this, R.anim.tile_enter), 0.06f));
-        adapter = new AppAdapter(this, this, COLUMNS);
+        grid.addItemDecoration(dockDecoration = new DockDecoration(COLUMNS, density, skin));
+        applyEntranceAnimation();
+        adapter = new AppAdapter(this, this, COLUMNS, skin);
         grid.setAdapter(adapter);
 
         // tvOS layout: push the dock row to the bottom of the screen; the grid hides below until you press Down.
@@ -137,9 +155,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // Liquid feel: soft springs on the highlight's position.
         springX = new SpringAnimation(glass, DynamicAnimation.TRANSLATION_X);
         springY = new SpringAnimation(glass, DynamicAnimation.TRANSLATION_Y);
-        for (SpringAnimation s : new SpringAnimation[]{springX, springY}) {
-            s.setSpring(new SpringForce().setStiffness(260f).setDampingRatio(0.58f));
-        }
+        applySprings();
 
         View btnInputs = findViewById(R.id.btnInputs);
         View btnSettings = findViewById(R.id.btnSettings);
@@ -204,12 +220,13 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     public void onTileFocused(int position, View card) {
         lastFocused = position;
+        Tokens t = skin.tokens();
         // Tile rect in root coordinates, using layout positions (ignores the scale animation).
         Rect r = new Rect(0, 0, card.getWidth(), card.getHeight());
         root.offsetDescendantRectToMyCoords(card, r);
-        float pad = 6f * density;        // matches GlassView's glow inset
-        float w = card.getWidth() * AppAdapter.FOCUS_SCALE + 2 * pad;
-        float h = card.getHeight() * AppAdapter.FOCUS_SCALE + 2 * pad;
+        float pad = skin.dp(t.glassInset);        // matches GlassView's glow inset
+        float w = card.getWidth() * t.focusScale + 2 * pad;
+        float h = card.getHeight() * t.focusScale + 2 * pad;
         float x = r.exactCenterX() - w / 2f;
         float y = r.exactCenterY() - h / 2f;
 
@@ -218,7 +235,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             lp.width = (int) w;
             lp.height = (int) h;
             glass.setLayoutParams(lp);
-            glass.setRadius(16f * density * AppAdapter.FOCUS_SCALE + pad);
+            glass.setRadius(skin.dp(t.tileRadius) * t.focusScale + pad);
         }
         glassTargetX = x;
         glassTargetY = y;
@@ -227,7 +244,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             springY.cancel();
             glass.setTranslationX(x);
             glass.setTranslationY(y);
-            glass.animate().alpha(1f).setDuration(180).start();
+            glass.animate().alpha(1f).setDuration(t.glassInMs).start();
             glassShown = true;
         } else {
             springX.animateToFinalPosition(x);
@@ -253,6 +270,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void showHero(int position, float dockTopInRoot) {
         String label = adapter.labelAt(position);
         int color = adapter.ambientColorAt(position);
+        Tokens t = skin.tokens();
         float y = dockTopInRoot - 14 * density - 26 * density - heroName.getHeight();
         boolean changed = !label.contentEquals(heroName.getText());
 
@@ -260,21 +278,22 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             heroName.setText(label);
             heroName.setY(y);
             heroName.setTranslationX(0f);
-            heroName.animate().alpha(1f).setDuration(260).start();
+            heroName.animate().alpha(1f).setDuration(t.heroInMs).start();
             setAmbient(color);
-            ambient.animate().alpha(1f).setDuration(600).start();
+            ambient.animate().alpha(1f).setDuration(t.ambientInMs).start();
             heroShown = true;
         } else if (changed) {
-            heroName.animate().alpha(0f).translationX(-12 * density).setDuration(120).withEndAction(() -> {
-                heroName.setText(label);
-                heroName.setY(y);
-                heroName.setTranslationX(12 * density);
-                heroName.animate().alpha(1f).translationX(0f).setDuration(200).start();
-            }).start();
+            heroName.animate().alpha(0f).translationX(-12 * density).setDuration(t.heroSwapOutMs)
+                    .withEndAction(() -> {
+                        heroName.setText(label);
+                        heroName.setY(y);
+                        heroName.setTranslationX(12 * density);
+                        heroName.animate().alpha(1f).translationX(0f).setDuration(t.heroSwapInMs).start();
+                    }).start();
             if (color != ambientColor) {
-                ambient.animate().alpha(0.35f).setDuration(200).withEndAction(() -> {
+                ambient.animate().alpha(0.35f).setDuration(t.ambientSwapOutMs).withEndAction(() -> {
                     setAmbient(color);
-                    ambient.animate().alpha(1f).setDuration(500).start();
+                    ambient.animate().alpha(1f).setDuration(t.ambientSwapInMs).start();
                 }).start();
             }
         } else {
@@ -285,20 +304,57 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void setAmbient(int color) {
         ambientColor = color;
         int c = color & 0x00FFFFFF;
-        ambientGlow.setColors(new int[]{0x5C000000 | c, 0x26000000 | c, 0x00000000 | c});
+        Tokens t = skin.tokens();
+        ambientGlow.setColors(new int[]{(t.ambientCore << 24) | c, (t.ambientEdge << 24) | c, c});
     }
 
     private void hideHero() {
         if (!heroShown) return;
         heroShown = false;
-        heroName.animate().alpha(0f).setDuration(160).start();
-        ambient.animate().alpha(0f).setDuration(300).start();
+        Tokens t = skin.tokens();
+        heroName.animate().alpha(0f).setDuration(t.heroOutMs).start();
+        ambient.animate().alpha(0f).setDuration(t.ambientOutMs).start();
     }
 
     private void hideGlass() {
         if (!glassShown) return;
         glassShown = false;
-        glass.animate().alpha(0f).setDuration(160).start();
+        glass.animate().alpha(0f).setDuration(skin.tokens().glassOutMs).start();
+    }
+
+    // ---- theme ------------------------------------------------------------------------------------
+
+    private boolean isNightMode() {
+        return (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    /** Re-reads the theme and repaints everything. Preview uses this with unsaved tokens. */
+    void applyTheme(Tokens t) {
+        skin.retheme(t);
+        skin.applyScreen(this, root);
+        glass.retheme(t);
+        dockDecoration.retheme();
+        adapter.invalidateAmbient();
+        grid.invalidateItemDecorations();
+        adapter.notifyDataSetChanged();     // recycled tiles must pick up the new colours
+        applySprings();
+        applyEntranceAnimation();
+    }
+
+    private void applySprings() {
+        Tokens t = skin.tokens();
+        for (SpringAnimation s : new SpringAnimation[]{springX, springY}) {
+            s.setSpring(new SpringForce().setStiffness(t.springStiffness).setDampingRatio(t.springDamping));
+        }
+    }
+
+    private void applyEntranceAnimation() {
+        Tokens t = skin.tokens();
+        Animation anim = AnimationUtils.loadAnimation(this, R.anim.tile_enter);
+        // LayoutAnimationController exposes no duration, so it is set on the animation itself.
+        anim.setDuration(t.entranceMs);
+        grid.setLayoutAnimation(new LayoutAnimationController(anim, t.entranceStagger));
     }
 
     // ---- navigation ------------------------------------------------------------------------------
@@ -392,6 +448,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void showInputs() {
         View anchor = findViewById(R.id.btnInputs);
         View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
+        panel.setBackground(skin.panelBackground());
         LinearLayout rows = panel.findViewById(R.id.rows);
 
         // Compact: as wide as the Inputs pill (a touch wider so "HDMI 1" fits), hanging right below it.
@@ -450,7 +507,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     private void addSeparator(LinearLayout rows) {
         View line = new View(this);
-        line.setBackgroundColor(0x1FFFFFFF);
+        line.setBackgroundColor(skin.separator());
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) density);
         int m = (int) (6 * density), h = (int) (12 * density);
         lp.setMargins(h, m, h, m);
@@ -459,6 +516,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     private void addInputRow(LinearLayout rows, PopupWindow popup, int iconRes, String title, int state, Runnable action) {
         View row = getLayoutInflater().inflate(R.layout.item_input, rows, false);
+        skin.applyInputRow(row);
         ((ImageView) row.findViewById(R.id.icon)).setImageResource(iconRes);
         ((TextView) row.findViewById(R.id.title)).setText(title);
         TextView status = row.findViewById(R.id.status);

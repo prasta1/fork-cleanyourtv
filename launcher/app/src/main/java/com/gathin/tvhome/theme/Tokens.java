@@ -77,7 +77,7 @@ public final class Tokens {
     public float panelRadius;
     public float inputRowRadius;
 
-    // ---- motion (13) ----
+    // ---- motion (19) ----
 
     public float springStiffness;
     public float springDamping;
@@ -88,9 +88,15 @@ public final class Tokens {
     public int focusOutMs;
     public int glassInMs;
     public int glassOutMs;
-    public int heroMs;
-    public int heroSwapMs;
-    public int ambientMs;
+    public int heroInMs;              // the focused dock app's name fading in
+    public int heroOutMs;
+    public int heroSwapOutMs;         // the name swapping to the next app
+    public int heroSwapInMs;
+    public int ambientInMs;           // the glow behind that name
+    public int ambientOutMs;
+    public int ambientSwapOutMs;
+    public int ambientSwapInMs;
+    public int tileNameMs;            // the name fading in under a focused tile
     public int entranceMs;
 
     // ---- typography (8) ----
@@ -165,9 +171,15 @@ public final class Tokens {
         t.focusOutMs = focusOutMs;
         t.glassInMs = glassInMs;
         t.glassOutMs = glassOutMs;
-        t.heroMs = heroMs;
-        t.heroSwapMs = heroSwapMs;
-        t.ambientMs = ambientMs;
+        t.heroInMs = heroInMs;
+        t.heroOutMs = heroOutMs;
+        t.heroSwapOutMs = heroSwapOutMs;
+        t.heroSwapInMs = heroSwapInMs;
+        t.ambientInMs = ambientInMs;
+        t.ambientOutMs = ambientOutMs;
+        t.ambientSwapOutMs = ambientSwapOutMs;
+        t.ambientSwapInMs = ambientSwapInMs;
+        t.tileNameMs = tileNameMs;
         t.entranceMs = entranceMs;
         t.clock = clock;
         t.amPm = amPm;

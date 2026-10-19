@@ -173,6 +173,11 @@ public final class Skin {
         return pillText;
     }
 
+    /** The frosted panel behind the Inputs menu and the theme picker. */
+    public Drawable panelBackground() {
+        return panelBackground;
+    }
+
     public int background() {
         return tokens.background;
     }

@@ -27,6 +27,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gathin.tvhome.theme.Skin;
+import com.gathin.tvhome.theme.Tokens;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -64,21 +67,24 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         }
     }
 
-    static final float FOCUS_SCALE = 1.10f;
+    /** Lifts a nearly monochrome banner to this value before it is used as a glow. */
+    private static final float MONOCHROME_FLOOR = 0.55f;
 
     private final Context ctx;
     private final TileListener listener;
     private final int dockSize;
+    private final Skin skin;
     /** Dock order (res/values/config.xml, dock_apps). */
     private final List<String> favourites;
     /** Never shown as tiles (res/values/config.xml, hidden_apps). */
     private final Set<String> hidden;
     private final List<Entry> items = new ArrayList<>();
 
-    AppAdapter(Context ctx, TileListener listener, int dockSize) {
+    AppAdapter(Context ctx, TileListener listener, int dockSize, Skin skin) {
         this.ctx = ctx;
         this.listener = listener;
         this.dockSize = dockSize;
+        this.skin = skin;
         this.favourites = Arrays.asList(ctx.getResources().getStringArray(R.array.dock_apps));
         this.hidden = new HashSet<>(Arrays.asList(ctx.getResources().getStringArray(R.array.hidden_apps)));
     }
@@ -116,7 +122,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_app, parent, false);
-        return new Holder(v, listener);
+        return new Holder(v, listener, skin);
     }
 
     @Override
@@ -127,6 +133,8 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         h.name.setAlpha(0f);
         h.card.setScaleX(1f);
         h.card.setScaleY(1f);
+        // Recycled views keep their old colours unless every bind re-applies the active theme.
+        skin.applyTile(h.itemView);
         if (e.banner != null) {
             h.banner.setImageDrawable(e.banner);
             h.banner.setVisibility(View.VISIBLE);
@@ -175,14 +183,20 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
 
     /** A vivid colour sampled from the app's banner (or icon), cached per entry. */
     int ambientColorAt(int position) {
-        if (position < 0 || position >= items.size()) return 0xFF444444;
+        Tokens t = skin.tokens();
+        if (position < 0 || position >= items.size()) return t.ambientFallback;
         Entry e = items.get(position);
-        if (e.ambient == 0) e.ambient = vividColor(e.banner != null ? e.banner : e.icon);
+        if (e.ambient == 0) e.ambient = vividColor(e.banner != null ? e.banner : e.icon, t);
         return e.ambient;
     }
 
-    private static int vividColor(Drawable live) {
-        if (live == null) return 0xFF444444;
+    /** Drops the cached samples so a new theme can boost them differently. */
+    void invalidateAmbient() {
+        for (Entry e : items) e.ambient = 0;
+    }
+
+    private static int vividColor(Drawable live, Tokens tokens) {
+        if (live == null) return tokens.ambientFallback;
         // Draw a private copy: changing the bounds of the drawable an ImageView shows would blank the tile.
         Drawable d = live.getConstantState() != null ? live.getConstantState().newDrawable().mutate() : live;
         Rect saved = new Rect(d.getBounds());
@@ -193,7 +207,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         d.draw(c);
         d.setBounds(saved);
         float[] hsv = new float[3];
-        int best = 0xFF444444;
+        int best = tokens.ambientFallback;
         float bestScore = -1f;
         long r = 0, g = 0, b = 0;
         for (int y = 0; y < n; y++) {
@@ -214,12 +228,12 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         if (bestScore < 0.25f) {   // nearly monochrome banner (e.g. white): use its average, lifted
             int avg = Color.rgb((int) (r / (n * n)), (int) (g / (n * n)), (int) (b / (n * n)));
             Color.colorToHSV(avg, hsv);
-            hsv[2] = Math.max(hsv[2], 0.55f);
+            hsv[2] = Math.max(hsv[2], MONOCHROME_FLOOR);
             return Color.HSVToColor(hsv);
         }
         Color.colorToHSV(best, hsv);
-        hsv[1] = Math.min(1f, hsv[1] * 1.1f);
-        hsv[2] = Math.max(0.5f, hsv[2]);
+        hsv[1] = Math.min(1f, hsv[1] * tokens.ambientSaturation);
+        hsv[2] = Math.max(tokens.ambientValueFloor, hsv[2]);
         return Color.HSVToColor(hsv);
     }
 
@@ -230,7 +244,7 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
         final TextView label;
         final TextView name;
 
-        Holder(View v, TileListener listener) {
+        Holder(View v, TileListener listener, final Skin skin) {
             super(v);
             card = v.findViewById(R.id.card);
             banner = v.findViewById(R.id.banner);
@@ -239,10 +253,10 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             name = v.findViewById(R.id.name);
 
             final float density = v.getResources().getDisplayMetrics().density;
-            final float radius = density * 16f;
             card.setOutlineProvider(new ViewOutlineProvider() {
                 @Override
                 public void getOutline(View view, Outline outline) {
+                    float radius = skin.dp(skin.tokens().tileRadius);
                     outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), radius);
                 }
             });
@@ -256,14 +270,15 @@ public class AppAdapter extends RecyclerView.Adapter<AppAdapter.Holder> {
             });
 
             card.setOnFocusChangeListener((view, focused) -> {
-                float s = focused ? FOCUS_SCALE : 1.0f;
+                Tokens t = skin.tokens();
+                float s = focused ? t.focusScale : 1.0f;
                 view.animate().scaleX(s).scaleY(s)
-                        .setDuration(focused ? 260 : 180)
-                        .setInterpolator(new OvershootInterpolator(focused ? 1.6f : 0f))
+                        .setDuration(focused ? t.focusInMs : t.focusOutMs)
+                        .setInterpolator(new OvershootInterpolator(focused ? t.focusOvershoot : 0f))
                         .start();
                 name.animate().alpha(focused ? 1f : 0f)
                         .translationY(focused ? density * 4f : -density * 6f)
-                        .setDuration(220).start();
+                        .setDuration(t.tileNameMs).start();
                 int pos = getBindingAdapterPosition();
                 if (focused && listener != null && pos != RecyclerView.NO_POSITION) {
                     listener.onTileFocused(pos, view);
