@@ -31,7 +31,7 @@ public class GlassView extends View {
         radius = 20f * density;
         rim.setStyle(Paint.Style.STROKE);
         rim.setStrokeWidth(1.5f * density);
-        rim.setColor(0xCCFFFFFF);
+        rim.setColor(context.getColor(R.color.glass_rim));
         glow.setStyle(Paint.Style.STROKE);
     }
 
@@ -55,7 +55,7 @@ public class GlassView extends View {
         // Outer glow: three widening, fading strokes.
         for (int i = 1; i <= 3; i++) {
             glow.setStrokeWidth(i * 2f * density);
-            glow.setColor((0x30 / i) << 24 | 0xFFFFFF);
+            glow.setColor((0x30 / i) << 24 | rim.getColor() & 0x00FFFFFF);
             float o = i * density;
             canvas.drawRoundRect(rect.left - o, rect.top - o, rect.right + o, rect.bottom + o, radius + o, radius + o, glow);
         }

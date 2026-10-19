@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Light theme. Same names as values/colors.xml. -->
+<resources>
+    <color name="bg">#FFF2F2F5</color>
+    <color name="ink">#FF1B1B1F</color>
+    <color name="ink_mid">#B31B1B1F</color>
+    <color name="ink_soft">#A61B1B1F</color>
+    <color name="ink_dim">#991B1B1F</color>
+    <color name="hairline">#261B1B1F</color>
+    <color name="separator">#1F000000</color>
+
+    <color name="focus_fill">#F51B1B1F</color>
+    <color name="on_focus">#FFFFFFFF</color>
+    <color name="on_focus_dim">#CCFFFFFF</color>
+
+    <color name="pill_top">#0F1B1B1F</color>
+    <color name="pill_bottom">#081B1B1F</color>
+    <color name="pill_stroke">#261B1B1F</color>
+
+    <color name="panel_top">#F2FFFFFF</color>
+    <color name="panel_bottom">#F5EFEFF3</color>
+    <color name="panel_stroke">#1F000000</color>
+
+    <color name="dock_top">#FFDCDCE3</color>
+    <color name="dock_mid">#FFD2D2DA</color>
+    <color name="dock_bottom">#FFCACAD3</color>
+
+    <color name="tile">#FFE2E2E7</color>
+    <color name="glass_rim">#E61B1B1F</color>
+</resources>

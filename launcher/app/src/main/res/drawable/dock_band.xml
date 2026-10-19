@@ -12,9 +12,9 @@
     android:shape="rectangle">
     <gradient
         android:angle="270"
-        android:startColor="#FF34343A"
-        android:centerColor="#FF2A2A2F"
-        android:endColor="#FF232327"
+        android:startColor="@color/dock_top"
+        android:centerColor="@color/dock_mid"
+        android:endColor="@color/dock_bottom"
         android:centerY="0.35"
         android:type="linear" />
     <corners

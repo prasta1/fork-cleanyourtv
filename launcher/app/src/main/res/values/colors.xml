@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Every theme-dependent colour. This file is the dark theme (the default); values-notnight/ is the
+  light one. MainActivity forces the night/notnight qualifier from the user's saved choice, so the
+  system's own day/night setting is ignored.
+-->
+<resources>
+    <color name="bg">#FF000000</color>
+    <color name="ink">#FFFFFFFF</color>
+    <color name="ink_mid">#B3FFFFFF</color>
+    <color name="ink_soft">#A6FFFFFF</color>
+    <color name="ink_dim">#8CFFFFFF</color>
+    <color name="hairline">#33FFFFFF</color>
+    <color name="separator">#1FFFFFFF</color>
+
+    <!-- A focused pill / row inverts: solid fill, opposite-coloured text. -->
+    <color name="focus_fill">#F5FFFFFF</color>
+    <color name="on_focus">#FF111111</color>
+    <color name="on_focus_dim">#B3111111</color>
+
+    <color name="pill_top">#2EFFFFFF</color>
+    <color name="pill_bottom">#14FFFFFF</color>
+    <color name="pill_stroke">#38FFFFFF</color>
+
+    <color name="panel_top">#F22A2A2E</color>
+    <color name="panel_bottom">#F5161618</color>
+    <color name="panel_stroke">#33FFFFFF</color>
+
+    <color name="dock_top">#FF34343A</color>
+    <color name="dock_mid">#FF2A2A2F</color>
+    <color name="dock_bottom">#FF232327</color>
+
+    <color name="tile">#FF1C1C1E</color>
+    <!-- Rim and outer glow of the floating focus highlight. -->
+    <color name="glass_rim">#CCFFFFFF</color>
+</resources>

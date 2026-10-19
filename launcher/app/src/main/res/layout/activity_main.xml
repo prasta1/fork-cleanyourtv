@@ -3,7 +3,7 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF000000">
+    android:background="@color/bg">
 
     <!--
       The hero stage. The focused app's own banner, dropped in at low opacity, is what fills the
@@ -59,7 +59,7 @@
                     android:id="@+id/greeting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#A6FFFFFF"
+                    android:textColor="@color/ink_soft"
                     android:textSize="13sp"
                     android:fontFamily="@font/outfit"
                     android:fontVariationSettings="'wght' 500"
@@ -78,7 +78,7 @@
                         android:layout_height="wrap_content"
                         android:format12Hour="h:mm"
                         android:format24Hour="HH:mm"
-                        android:textColor="#FFFFFFFF"
+                        android:textColor="@color/ink"
                         android:textSize="52sp"
                         android:fontFamily="@font/outfit"
                         android:fontVariationSettings="'wght' 300"
@@ -94,7 +94,7 @@
                         android:layout_marginBottom="8dp"
                         android:format12Hour="a"
                         android:format24Hour=""
-                        android:textColor="#B3FFFFFF"
+                        android:textColor="@color/ink_mid"
                         android:textSize="16sp"
                         android:fontFamily="@font/outfit"
                         android:fontVariationSettings="'wght' 500"
@@ -108,7 +108,7 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
                         android:layout_marginBottom="8dp"
-                        android:background="#33FFFFFF" />
+                        android:background="@color/hairline" />
 
                     <TextClock
                         android:id="@+id/date"
@@ -118,7 +118,7 @@
                         android:layout_marginBottom="9dp"
                         android:format12Hour="EEEE  d MMMM"
                         android:format24Hour="EEEE  d MMMM"
-                        android:textColor="#A6FFFFFF"
+                        android:textColor="@color/ink_soft"
                         android:textSize="15sp"
                         android:fontFamily="@font/outfit"
                         android:fontVariationSettings="'wght' 400"
@@ -149,7 +149,7 @@
                     android:maxWidth="220dp"
                     android:maxLines="1"
                     android:ellipsize="end"
-                    android:textColor="#A6FFFFFF"
+                    android:textColor="@color/ink_soft"
                     android:textSize="15sp"
                     android:fontFamily="@font/outfit"
                     android:fontVariationSettings="'wght' 400" />
@@ -237,7 +237,7 @@
                 android:layout_gravity="start|bottom"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textColor="#FFFFFFFF"
+                android:textColor="@color/ink"
                 android:textSize="56sp"
                 android:fontFamily="@font/outfit"
                 android:fontVariationSettings="'wght' 300"

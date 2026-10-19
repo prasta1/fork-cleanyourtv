@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.Rect;
@@ -59,6 +61,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** Tiles per row in the grid (res/values/config.xml, columns). The dock holds dock_apps. */
     static int COLUMNS = 4;
+    private static final String PREFS = "tvhome";
+    private static final String KEY_LIGHT = "light_mode";
+    /** Set across the theme-switch recreate so the Settings menu comes straight back. */
+    private static boolean reopenSettings;
+
     private static final long MINUTE_MS = 60_000L;
     private static final long GLASS_MS = 170L;
     private String liveTvPkg;
@@ -104,6 +111,24 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
     };
 
+    /**
+     * Pins the night/notnight resource qualifier to the user's saved choice (ignoring the system's),
+     * so values/ (dark) or values-notnight/ (light) colours are picked for the whole activity.
+     */
+    @Override
+    protected void attachBaseContext(Context base) {
+        boolean light = base.getSharedPreferences(PREFS, MODE_PRIVATE).getBoolean(KEY_LIGHT, false);
+        Configuration c = new Configuration(base.getResources().getConfiguration());
+        c.uiMode = (c.uiMode & ~Configuration.UI_MODE_NIGHT_MASK)
+                | (light ? Configuration.UI_MODE_NIGHT_NO : Configuration.UI_MODE_NIGHT_YES);
+        super.attachBaseContext(base.createConfigurationContext(c));
+    }
+
+    /** The theme's background colour at the given alpha (0-255), for scrims and fades. */
+    private int bg(int alpha) {
+        return getColor(R.color.bg) & 0x00FFFFFF | alpha << 24;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,20 +149,20 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         scrimLeft.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) ->
                 scrimLeft.setBackground(new GradientDrawable(
                         GradientDrawable.Orientation.LEFT_RIGHT,
-                        new int[]{0xC6000000, 0x73000000, 0x1A000000, 0x00000000})));
+                        new int[]{bg(0xC6), bg(0x73), bg(0x1A), bg(0x00)})));
         scrimBottom.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) ->
                 scrimBottom.setBackground(new GradientDrawable(
                         GradientDrawable.Orientation.TOP_BOTTOM,
-                        new int[]{0x00000000, 0x73000000, 0xD9000000})));
+                        new int[]{bg(0x00), bg(0x73), bg(0xD9)})));
 
         // Edge fades for the grid, so a half-scrolled row dissolves instead of being sliced. Kept to a
 // single smooth ramp: a band of flat black reads as a masked bar drawn over the content.
         gridFadeTop = findViewById(R.id.gridFadeTop);
         gridFadeBottom = findViewById(R.id.gridFadeBottom);
         gridFadeTop.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{0xE6000000, 0x73000000, 0x00000000}));
+                new int[]{bg(0xE6), bg(0x73), bg(0x00)}));
         gridFadeBottom.setBackground(new GradientDrawable(GradientDrawable.Orientation.BOTTOM_TOP,
-                new int[]{0xE6000000, 0x73000000, 0x00000000}));
+                new int[]{bg(0xE6), bg(0x73), bg(0x00)}));
 
         ambientGlow = new GradientDrawable();
         ambientGlow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
@@ -184,7 +209,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         pills[2] = findViewById(R.id.btnSettings);
         pills[0].setOnClickListener(v -> showInputs());
         pills[1].setOnClickListener(v -> open(new Intent(Settings.ACTION_WIFI_SETTINGS)));
-        pills[2].setOnClickListener(v -> open(new Intent(Settings.ACTION_SETTINGS)));
+        pills[2].setOnClickListener(v -> showSettings());
+        if (reopenSettings) {
+            reopenSettings = false;
+            root.post(() -> {
+                pills[2].requestFocus();
+                showSettings();
+            });
+        }
 
         // Re-place the highlight immediately before every draw while it is visible.
         //
@@ -735,16 +767,53 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         rows.getChildAt(0).requestFocus();
     }
 
+    /** Dropdown under the Settings pill: the light/dark toggle, then the system Settings app. */
+    private void showSettings() {
+        View anchor = pills[2];
+        View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
+        LinearLayout rows = panel.findViewById(R.id.rows);
+
+        int width = Math.max(anchor.getWidth(), (int) (210 * density));
+        final PopupWindow popup = new PopupWindow(panel, width, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popup.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));   // needed for Back to dismiss
+        popup.setOutsideTouchable(true);
+        popup.setAnimationStyle(0);
+        popup.setElevation(0f);
+
+        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        boolean light = prefs.getBoolean(KEY_LIGHT, false);
+        View toggle = addInputRow(rows, popup, R.drawable.ic_theme, getString(R.string.light_mode), -1, () -> {
+            prefs.edit().putBoolean(KEY_LIGHT, !light).apply();
+            reopenSettings = true;
+            recreate();   // re-runs attachBaseContext, which picks the other colour set
+        });
+        TextView state = toggle.findViewById(R.id.status);
+        state.setText(light ? R.string.on : R.string.off);
+        state.setVisibility(View.VISIBLE);
+        addSeparator(rows);
+        addInputRow(rows, popup, R.drawable.ic_settings, getString(R.string.system_settings), -1,
+                () -> open(new Intent(Settings.ACTION_SETTINGS)));
+
+        panel.setAlpha(0f);
+        panel.setPivotY(0f);
+        panel.setScaleY(0.92f);
+        panel.setTranslationY(-8 * density);
+        popup.showAsDropDown(anchor, 0, (int) (10 * density), Gravity.END);
+        panel.animate().alpha(1f).scaleY(1f).translationY(0f).setDuration(220)
+                .setInterpolator(new DecelerateInterpolator(1.6f)).start();
+        rows.getChildAt(0).requestFocus();
+    }
+
     private void addSeparator(LinearLayout rows) {
         View line = new View(this);
-        line.setBackgroundColor(0x1FFFFFFF);
+        line.setBackgroundColor(getColor(R.color.separator));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) density);
         int m = (int) (6 * density), h = (int) (12 * density);
         lp.setMargins(h, m, h, m);
         rows.addView(line, lp);
     }
 
-    private void addInputRow(LinearLayout rows, PopupWindow popup, int iconRes, String title, int state, Runnable action) {
+    private View addInputRow(LinearLayout rows, PopupWindow popup, int iconRes, String title, int state, Runnable action) {
         View row = getLayoutInflater().inflate(R.layout.item_input, rows, false);
         ((ImageView) row.findViewById(R.id.icon)).setImageResource(iconRes);
         ((TextView) row.findViewById(R.id.title)).setText(title);
@@ -767,5 +836,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             action.run();
         });
         rows.addView(row);
+        return row;
     }
 }

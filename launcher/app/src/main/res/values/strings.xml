@@ -16,4 +16,8 @@
     <string name="good_night">Good night</string>
     <string name="ethernet">Ethernet</string>
     <string name="offline">Offline</string>
+    <string name="light_mode">Light mode</string>
+    <string name="system_settings">System settings</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
 </resources>
