@@ -1367,6 +1367,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 == Configuration.UI_MODE_NIGHT_YES;
     }
 
+    /**
+     * The TV flipped day/night. The manifest lists uiMode in configChanges, so the activity is not
+     * recreated and arrives here instead. Skipped while the picker is open: it is previewing unsaved
+     * tokens, and applying the stored theme would yank the preview out from under the user.
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (!picker.isOpen() && store.followSystem()) applyTheme(store.current(isNightMode()));
+    }
+
     /** Re-reads the theme and repaints everything. Preview uses this with unsaved tokens. */
     void applyTheme(Tokens t) {
         adapter.setDark(isDarkVariant());
