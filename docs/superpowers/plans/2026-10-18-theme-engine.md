@@ -68,10 +68,18 @@ Tasks 2, 4 are independent of each other and can be done in either order. Everyt
 
   ```groovy
   testImplementation 'junit:junit:4.13.2'
-  testImplementation 'xmlpull:xmlpull:1.1.3.1'
+  testImplementation 'net.sf.kxml:kxml2:2.3.0'
   ```
 
-**Why the second dependency.** `ThemeParser` uses `org.xmlpull.v1`, which Android provides but the JDK does not implement. `xmlpull:xmlpull` puts an implementation on the unit-test classpath. If it fails to resolve, use `net.sf.kxml:kxml2:2.3.0` instead. The alternative — parsing with `DocumentBuilderFactory` — needs no dependency but allocates a whole DOM on a device with 1 GB of RAM, and this codebase cares about that.
+**Why the second dependency.** `ThemeParser` uses `org.xmlpull.v1`, which Android provides but the JDK does not implement. kxml2 supplies that implementation.
+
+**Gotcha, hit on the first attempt:** `xmlpull:xmlpull:1.1.3.1` *resolves fine* and is still not
+usable — it is the interfaces-only artifact and registers no provider, so
+`XmlPullParserFactory.newInstance()` throws `resource not found:
+/META-INF/services/org.xmlpull.v1.XmlPullParserFactory`. "It resolved" is not "it works". Use kxml2.
+
+The alternative — parsing with `DocumentBuilderFactory` — needs no dependency but allocates a whole
+DOM on a device with 1 GB of RAM, and this codebase cares about that.
 
 Both artifacts were confirmed to resolve from Maven Central on 2026-10-19.
 
@@ -83,7 +91,9 @@ with `DocumentBuilderFactory` and accept the DOM cost; say so rather than discov
 
 **Files**
 
-- `launcher/app/src/test/java/com/gathin/tvhome/theme/TokensTest.java` — placeholder asserting `Defaults.tokens()` is non-null. Replaced by real assertions in Task 2. Keeps the test source set wired from the start.
+- `launcher/app/src/test/java/com/gathin/tvhome/theme/ParserFactoryTest.java` — asserts
+  `XmlPullParserFactory` can produce a parser. It exists to guard the dependency seam above, and it
+  has already earned its place by catching the `xmlpull` interfaces-only artifact.
 
 **Verify** `./gradlew :app:testDebugUnitTest` — green with one test.
 
