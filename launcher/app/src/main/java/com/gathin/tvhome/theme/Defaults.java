@@ -102,6 +102,8 @@ public final class Defaults {
         t.pill = new Tokens.TypeSpec(15f, 500, 0.01f);
         t.tileName = new Tokens.TypeSpec(14f, 500, 0.02f);
         t.tileLabel = new Tokens.TypeSpec(13f, 400, 0f);
+        t.inputRowTitle = new Tokens.TypeSpec(15f, 500, 0f);
+        t.inputRowStatus = new Tokens.TypeSpec(11f, 400, 0.04f);
 
         return t;
     }

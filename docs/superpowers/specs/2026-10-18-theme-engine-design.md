@@ -117,12 +117,12 @@ Rules:
 
 ## Token reference
 
-68 named tokens (84 scalar values). Every default below is the value currently hardcoded in the
+75 named tokens (92 scalar values). Every default below is the value currently hardcoded in the
 repo; no new visual knobs are introduced except `pickerScrim` and `entranceMs`, which cover
 surfaces that did not exist before this work.
 
-Counting the tables below: 32 colour + 5 ambient + 9 shape + 14 motion + 8 typography = 68 tokens,
-and 84 scalars once each typography token's `size`, `weight` and `tracking` are counted separately.
+Counting the tables below: 32 colour + 5 ambient + 9 shape + 19 motion + 10 typography = 75 tokens,
+and 92 scalars once each typography token's `size`, `weight` and `tracking` are counted separately.
 
 The colour table is exhaustive against the current code: extracting every `#RRGGBB` literal from
 `res/` and every `0xAARRGGBB` from `java/` accounts for all 32 entries, leaving only the icon
@@ -219,7 +219,7 @@ now a theme decision. The two `SpringAnimation`s are re-`setSpring`ed on retheme
 recreated. `entranceMs` is applied to the loaded `Animation` via `setDuration`, because
 `LayoutAnimationController` exposes no duration setter.
 
-### Typography (8 tokens, `{size, weight, tracking}`)
+### Typography (10 tokens, `{size, weight, tracking}`)
 
 | Token | size | weight | tracking | Currently in |
 |---|---|---|---|---|
@@ -231,6 +231,21 @@ recreated. `entranceMs` is applied to the loaded `Animation` via `setDuration`, 
 | `pill` | `15sp` | 500 | `0.01` | `styles.xml` `TopButton` |
 | `tileName` | `14sp` | 500 | `0.02` | `item_app.xml` |
 | `tileLabel` | `13sp` | 400 | `0` | `item_app.xml` |
+| `inputRowTitle` | `15sp` | 500 | `0` | `item_input.xml` |
+| `inputRowStatus` | `11sp` | 400 | `0.04` | `item_input.xml` |
+
+The two Inputs-menu rows are separate tokens from `pill` rather than derived from it: the row title
+carries no letter-spacing and the status is 11sp, so reusing the pill's values would have silently
+changed both.
+
+### Not themed
+
+Two things are deliberately outside the token set:
+
+- **Typeface.** Outfit stays declared in the layouts. Only one font is bundled.
+- **The Inputs menu's drop-in animation** (a 220ms scale-and-fade when the panel opens). It is a
+  one-off transition for a menu that has no theme variants, not part of the visual identity. The
+  panel's colours, radius and row typography are themed.
 
 ## Shipped themes
 
@@ -342,10 +357,13 @@ Three token counts in the chat review were wrong and are corrected here: the sha
 not 7 (`dockBandRadius` and `inputRowRadius` were undercounted); `entranceMs` was missing from the
 motion list; and the colour set was undercounted by four — `clockDivider`, `panelFillTop`,
 `panelFillBottom` and `panelStroke` were all missed, which would have left a light theme with a
-near-black Inputs panel outlined in white. A fifth was missed during implementation, when
-`tileNameMs` had to be added rather than fudging the tile-name animation out of other tokens' values.
-An `iconTint` token proposed in the chat was also dropped, for the reason given in the colour
-section. The totals are 68 named tokens and 84 scalars.
+near-black Inputs panel outlined in white.
+
+Implementation found seven more: the five hero and ambient hide/swap durations (deriving them from
+one another's values was rejected outright), and the two Inputs-row type specs, whose real values
+differ from the pill's. `AppAdapter.FOCUS_SCALE` also stopped being a `static final`, since focus
+scale is now a theme decision. An `iconTint` token proposed in the chat was dropped, for the reason
+given in the colour section. The totals are 75 named tokens and 92 scalars.
 
 Two transcription errors were caught while writing `Defaults.java`, where the compiler rejected two
 hex literals that were ten digits rather than eight. `textGreeting` and `textTileName` have been

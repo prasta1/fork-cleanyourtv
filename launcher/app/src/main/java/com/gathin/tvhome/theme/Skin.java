@@ -157,12 +157,12 @@ public final class Skin {
         row.setBackground(inputRowBackground);
         TextView title = row.findViewById(R.id.title);
         title.setTextColor(pillText);
-        applyType(title, tokens.pill);
+        applyType(title, tokens.inputRowTitle);
         ImageView icon = row.findViewById(R.id.icon);
         if (icon != null) icon.setImageTintList(pillText);
         TextView status = row.findViewById(R.id.status);
         status.setTextColor(pillTextDim);
-        status.setTextSize(TypedValue.COMPLEX_UNIT_SP, tokens.pill.sizeSp * 0.75f);
+        applyType(status, tokens.inputRowStatus);
         View dot = row.findViewById(R.id.dot);
         if (dot != null) dot.setBackground(statusDot);
     }

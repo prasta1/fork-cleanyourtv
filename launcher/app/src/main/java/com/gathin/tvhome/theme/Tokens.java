@@ -99,7 +99,7 @@ public final class Tokens {
     public int tileNameMs;            // the name fading in under a focused tile
     public int entranceMs;
 
-    // ---- typography (8) ----
+    // ---- typography (10) ----
 
     public TypeSpec clock;
     public TypeSpec amPm;
@@ -109,6 +109,8 @@ public final class Tokens {
     public TypeSpec pill;
     public TypeSpec tileName;
     public TypeSpec tileLabel;
+    public TypeSpec inputRowTitle;      // an input's name in the Inputs menu
+    public TypeSpec inputRowStatus;     // its Connected / No device state
 
     /**
      * A shallow copy. Every field is a primitive or an immutable {@link TypeSpec}, so the
@@ -189,6 +191,8 @@ public final class Tokens {
         t.pill = pill;
         t.tileName = tileName;
         t.tileLabel = tileLabel;
+        t.inputRowTitle = inputRowTitle;
+        t.inputRowStatus = inputRowStatus;
         return t;
     }
 

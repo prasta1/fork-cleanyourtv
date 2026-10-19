@@ -38,6 +38,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:duplicateParentState="true"
-        android:fontFamily="@font/outfit"
-        android:letterSpacing="0.04" />
+        android:fontFamily="@font/outfit" />
 </LinearLayout>
