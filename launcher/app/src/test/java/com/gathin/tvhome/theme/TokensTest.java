@@ -49,7 +49,7 @@ public class TokensTest {
         assertEquals(0xFF141416, t.dockBand);
         assertEquals(0xFFFFFFFF, t.textPill);
         assertEquals(0xFF111111, t.textPillFocus);
-        assertEquals(0xCC000000, t.pickerScrim);
+        assertEquals(0x40000000, t.pickerScrim);
         assertEquals(16f, t.tileRadius, 0.0001f);
         assertEquals(1.10f, t.focusScale, 0.0001f);
         assertEquals(52f, t.clock.sizeSp, 0.0001f);

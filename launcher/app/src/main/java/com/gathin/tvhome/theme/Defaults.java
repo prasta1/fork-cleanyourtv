@@ -52,7 +52,7 @@ public final class Defaults {
         t.panelFillTop = 0xF22A2A2E;
         t.panelFillBottom = 0xF5161618;
         t.panelStroke = 0x33FFFFFF;
-        t.pickerScrim = 0xCC000000;
+        t.pickerScrim = 0x40000000;
 
         // ambient
         t.ambientCore = 0x5C;
