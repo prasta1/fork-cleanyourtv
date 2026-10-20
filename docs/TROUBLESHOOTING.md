@@ -24,6 +24,14 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   _adb-tls-pairing._tcp` (or `adb mdns services`) shows the pairing port while the code is on screen.
   Android switches Wireless debugging off whenever Wi-Fi drops; turn it back on and `adb` reconnects
   without a new code. Port 5555 from `adb tcpip` usually lasts only until the next reboot.
+- **`tools/tv.py` against the Wireless debugging port** (Android 11+, a random port shown under
+  Developer options; set `TV_PORT` to it). That port upgrades to TLS and only accepts keys that were
+  paired once, so `tv.py` speaks the TLS upgrade itself but cannot pair. Pair with the stock `adb`,
+  then give `tv.py` the key adb made (it falls back to `~/.android/adbkey` when `tools/adbkey/` does
+  not exist): `H=$(mktemp -d) && HOME=$H adb pair <ip>:<pair-port> <code> && mkdir -p tools/adbkey &&
+  cp $H/.android/adbkey* tools/adbkey/`. The pair port is not the connect port, the code lasts about
+  a minute, and the connect port changes every time Wireless debugging is toggled. An unpaired key
+  fails with `TLS_ALERT_CERTIFICATE_UNKNOWN`. Plain ADB on 5555 needs none of this.
 - **USB devices go dead while USB debugging is on**, seen on the Xiaomi Mi Box S: its firmware
   switches the USB port to ADB device mode, which cuts the power to a USB speaker or drive. Switch
   USB debugging off when you're done; the launcher doesn't need it.
