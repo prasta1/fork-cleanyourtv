@@ -976,9 +976,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             lp.width = (int) w;
             lp.height = (int) h;
             glass.setLayoutParams(lp);
-            // GlassView draws its slab inset by pad, i.e. exactly over the zoomed tile: same corners as the tile.
-            glass.setRadius(AppAdapter.cornerRadius(card.getWidth(), density, skin.tokens().tileRadius) * scale);
         }
+        // GlassView draws its slab inset by pad, i.e. exactly over the zoomed tile: same corners as the tile.
+        // Set on every focus, not only on a resize: retheme() resets it to the theme's glassRadius.
+        glass.setRadius(AppAdapter.cornerRadius(card.getWidth(), density, skin.tokens().tileRadius) * scale);
         glassTargetX = x;
         glassTargetY = y;
         if (!glassShown) {
@@ -1390,6 +1391,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         setAmbient(ambientColor);
         grid.invalidateItemDecorations();
         adapter.notifyDataSetChanged();     // recycled tiles must pick up the new colours
+        grid.post(() -> {                   // re-fit the glass to the new tile radius and zoom
+            RecyclerView.ViewHolder vh = grid.findViewHolderForAdapterPosition(lastFocused);
+            if (vh != null && vh.itemView.hasFocus() && glassShown) onTileFocused(lastFocused, vh.itemView.findViewById(R.id.card));
+        });
         applySprings();
         if (animations) applyEntranceAnimation();
     }
