@@ -223,8 +223,9 @@ public final class Skin {
     }
 
     /** The frosted panel behind the Inputs menu and the theme picker. */
+    /** A private copy: two panels can be on screen at once (a menu over the library), and views must not share bounds. */
     public Drawable panelBackground() {
-        return panelBackground;
+        return own(panelBackground);
     }
 
     public int background() {
