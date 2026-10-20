@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/glass_panel"
     android:padding="6dp"
     android:elevation="12dp">
 
@@ -16,11 +15,9 @@
         android:paddingEnd="12dp"
         android:paddingTop="8dp"
         android:paddingBottom="6dp"
+        android:id="@+id/heading"
         android:text="@string/module_cards"
-        android:textColor="#8CFFFFFF"
-        android:textSize="11sp"
         android:fontFamily="@font/outfit_medium"
-        android:letterSpacing="0.18"
         android:textAllCaps="true" />
 
     <ScrollView

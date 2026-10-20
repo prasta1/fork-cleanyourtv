@@ -2031,6 +2031,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (card == null) return;
 
         View panel = getLayoutInflater().inflate(R.layout.dialog_card_prompt, root, false);
+        skin.applyCardPrompt(panel);
         ((TextView) panel.findViewById(R.id.title)).setText(getString(R.string.card_prompt_title, card.appLabel));
         ((TextView) panel.findViewById(R.id.body)).setText(card.state == Cards.State.RESIGNED
                 ? getString(R.string.card_prompt_resigned, card.appLabel)
@@ -2110,12 +2111,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private void showModuleCardsNow() {
         View anchor = findViewById(R.id.btnSettings);
         View panel = getLayoutInflater().inflate(R.layout.popup_cards, root, false);
+        skin.applyCardsPanel(panel);
         LinearLayout rows = panel.findViewById(R.id.rows);
         final PopupWindow popup = glassPopup(panel, (int) (400 * density));
         List<Cards.Card> listed = new ArrayList<>(cards);
         Collections.sort(listed, Cards::byLabel);
         for (Cards.Card card : listed) {
             View row = getLayoutInflater().inflate(R.layout.item_card_row, rows, false);
+            skin.applyCardRow(row);
             row.setTag(card.pkg);
             ((TextView) row.findViewById(R.id.title)).setText(card.label);
             TextView app = row.findViewById(R.id.app);

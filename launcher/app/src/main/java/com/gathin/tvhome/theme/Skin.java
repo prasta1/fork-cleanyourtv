@@ -3,6 +3,7 @@ package com.gathin.tvhome.theme;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -181,6 +182,54 @@ public final class Skin {
     }
 
     /** One row of the Inputs menu. Focus follows from the parent via duplicateParentState in XML. */
+    /** A Skin from the stored theme, for screens that run outside MainActivity (quick settings). */
+    public static Skin forContext(Context ctx) {
+        boolean night = (ctx.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+        ThemeStore store = new ThemeStore(ctx, new ThemeCatalog(ctx));
+        return new Skin(ctx).retheme(store.current(night));
+    }
+
+    /** The theme's text colour at a given alpha (0-255): secondary text and hairlines that read on any variant. */
+    public int ink(int alpha) {
+        return (tokens.textPill & 0x00FFFFFF) | (alpha << 24);
+    }
+
+    /** Module cards prompt: panel, text and the two buttons. */
+    public void applyCardPrompt(View panel) {
+        panel.setBackground(panelBackground());
+        text(panel, R.id.title, tokens.textPill, new Tokens.TypeSpec(22f, 500, -0.01f));
+        text(panel, R.id.body, ink(0xD9), new Tokens.TypeSpec(15f, 400, 0f));
+        text(panel, R.id.names, ink(0xD9), new Tokens.TypeSpec(15f, 400, 0f));
+        text(panel, R.id.hint, ink(0x99), new Tokens.TypeSpec(13f, 400, 0f));
+        text(panel, R.id.identity, ink(0x80), new Tokens.TypeSpec(12f, 400, 0.03f));
+        applyPill(panel.findViewById(R.id.btnKeep));
+        applyPill(panel.findViewById(R.id.btnShow));
+    }
+
+    /** Module cards list: panel and its heading. */
+    public void applyCardsPanel(View panel) {
+        panel.setBackground(panelBackground());
+        text(panel, R.id.heading, tokens.textPillDim, new Tokens.TypeSpec(11f, 500, 0.18f));
+    }
+
+    /** One row of the module cards list. */
+    public void applyCardRow(View row) {
+        row.setBackground(own(inputRowBackground));
+        statesText(row, R.id.title, pillText, tokens.inputRowTitle);
+        statesText(row, R.id.state, pillText, tokens.inputRowStatus);
+        statesText(row, R.id.app, pillTextDim, tokens.inputRowStatus);
+        statesText(row, R.id.pkg, pillTextDim, tokens.inputRowStatus);
+        statesText(row, R.id.digest, pillTextDim, tokens.inputRowStatus);
+    }
+
+    private void statesText(View parent, int id, ColorStateList colours, Tokens.TypeSpec type) {
+        TextView v = parent.findViewById(id);
+        if (v == null) return;
+        v.setTextColor(colours);
+        applyType(v, type);
+    }
+
     public void applyInputRow(View row) {
         row.setBackground(own(inputRowBackground));
         TextView title = row.findViewById(R.id.title);

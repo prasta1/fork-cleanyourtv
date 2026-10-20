@@ -11,6 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.gathin.tvhome.theme.Skin;
+
 /**
  * The panel the remote's Settings button opens when {@code settings_key_panel} is on (HomeKeyService):
  * a few glass rows under the Settings pill, over Home or whatever app is playing. Translucent and in a
@@ -19,10 +21,14 @@ import android.widget.Toast;
  */
 public final class QuickSettingsActivity extends Activity {
 
+    private Skin skin;
+
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_quick_settings);
+        skin = Skin.forContext(this);
+        findViewById(R.id.panel).setBackground(skin.panelBackground());
         findViewById(R.id.scrim).setOnClickListener(v -> finish());
         LinearLayout rows = findViewById(R.id.rows);
         addRow(rows, R.drawable.ic_settings, R.string.tv_settings, 0, new Intent(Settings.ACTION_SETTINGS));
@@ -53,6 +59,7 @@ public final class QuickSettingsActivity extends Activity {
 
     private void addRow(LinearLayout rows, int icon, int title, int status, Intent target) {
         View row = getLayoutInflater().inflate(R.layout.item_input, rows, false);
+        skin.applyInputRow(row);
         ((ImageView) row.findViewById(R.id.icon)).setImageResource(icon);
         ((TextView) row.findViewById(R.id.title)).setText(title);
         row.findViewById(R.id.dot).setVisibility(View.GONE);
