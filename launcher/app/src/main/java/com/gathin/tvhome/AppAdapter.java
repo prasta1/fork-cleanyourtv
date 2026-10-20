@@ -57,6 +57,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         boolean onTileVerticalKey(int position, int keyCode);
 
         void onLibraryRequested();
+        void onThemeToggle();
         void onLibraryFocused();
         void onLibraryUp();
     }
@@ -184,7 +185,11 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final Set<String> hidden;
     private final boolean animations;
     private final boolean advancedEffects;
-    private final boolean showLibrary;
+    /** The footer row always exists (it holds the dark/light toggle); the library button in it is config app_library. */
+    private final boolean showLibrary = true;
+    private final boolean libraryEnabled;
+    /** Which variant is showing: the footer's theme button shows a moon for dark, a sun for light. */
+    private boolean dark = true;
     /** Packages with a leanback entry at the last reload(): their tiles launch with the leanback category. */
     private Set<String> leanbackPackages = new HashSet<>();
     private final boolean showHomeSettings;
@@ -203,7 +208,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.animations = cfg.animations;
         this.advancedEffects = cfg.animations && cfg.advancedEffects;
         this.showHomeSettings = cfg.showHomeSettingsShortcut;
-        this.showLibrary = cfg.appLibrary;
+        this.libraryEnabled = cfg.appLibrary;
         this.reducedMotion = cfg.reducedMotion;
         this.rowsBelowDock = cfg.rowsBelowDock;
         this.dockTitle = cfg.dockTitle;
@@ -314,15 +319,24 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == 1) {
             View row = LayoutInflater.from(ctx).inflate(R.layout.row_app_library, parent, false);
-            View button = row.findViewById(R.id.btnLibrary);
-            button.setOnClickListener(v -> listener.onLibraryRequested());
-            button.setOnFocusChangeListener((v, focused) -> { if (focused) listener.onLibraryFocused(); });
-            button.setOnKeyListener((v, key, event) -> {
-                if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
-                if (key == KeyEvent.KEYCODE_DPAD_UP) listener.onLibraryUp();
-                return key == KeyEvent.KEYCODE_DPAD_UP || key == KeyEvent.KEYCODE_DPAD_DOWN
-                        || key == KeyEvent.KEYCODE_DPAD_LEFT || key == KeyEvent.KEYCODE_DPAD_RIGHT;
-            });
+            View library = row.findViewById(R.id.btnLibrary);
+            View theme = row.findViewById(R.id.btnTheme);
+            library.setOnClickListener(v -> listener.onLibraryRequested());
+            theme.setOnClickListener(v -> listener.onThemeToggle());
+            for (View button : new View[]{library, theme}) {
+                button.setOnFocusChangeListener((v, focused) -> { if (focused) listener.onLibraryFocused(); });
+                button.setOnKeyListener((v, key, event) -> {
+                    if (event.getAction() != KeyEvent.ACTION_DOWN) return false;
+                    if (key == KeyEvent.KEYCODE_DPAD_UP) listener.onLibraryUp();
+                    if (key == KeyEvent.KEYCODE_DPAD_LEFT || key == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                        // Let focus move to the other button in the row (the framework knows the RTL order);
+                        // keep it from escaping the row at either end.
+                        View next = v.focusSearch(key == KeyEvent.KEYCODE_DPAD_LEFT ? View.FOCUS_LEFT : View.FOCUS_RIGHT);
+                        return next == null || next.getParent() != v.getParent();
+                    }
+                    return key == KeyEvent.KEYCODE_DPAD_UP || key == KeyEvent.KEYCODE_DPAD_DOWN;
+                });
+            }
             return new RecyclerView.ViewHolder(row) { };
         }
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_app, parent, false);
@@ -353,7 +367,12 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (isLibraryAt(position)) {
             // The library row is not part of the main screen, so Skin.applyScreen never reaches its button.
-            skin.applyPill(holder.itemView.findViewById(R.id.btnLibrary));
+            View library = holder.itemView.findViewById(R.id.btnLibrary);
+            library.setVisibility(libraryEnabled ? View.VISIBLE : View.GONE);
+            skin.applyPill((TextView) library);
+            TextView theme = holder.itemView.findViewById(R.id.btnTheme);
+            theme.setCompoundDrawablesRelativeWithIntrinsicBounds(dark ? R.drawable.ic_dark_mode : R.drawable.ic_light_mode, 0, 0, 0);
+            skin.applyPill(theme);
             return;
         }
         Holder h = (Holder) holder;
@@ -437,6 +456,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     int appCount() { return items.size(); }
+
+    /** Call before rebinding the footer after the theme variant changes. */
+    void setDark(boolean dark) { this.dark = dark; }
 
     boolean isLibraryAt(int position) { return showLibrary && position == items.size(); }
 

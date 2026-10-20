@@ -367,6 +367,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             applyEntranceAnimation();
         }
         adapter = new AppAdapter(this, this, COLUMNS, cfg, skin);
+        adapter.setDark(isDarkVariant());
         dockApps = cfg.dockApps;
         fillDockLeavesSlots = !cfg.fillDock;
         adapter.setSavedOrder(Order.ranks(Order.load(Order.file(this)), dockApps));
@@ -605,8 +606,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         cancelPendingFocusScroll();
         RecyclerView.ViewHolder footer = grid.findViewHolderForAdapterPosition(adapter.appCount());
         final boolean restoreLibrary = adapter.isLibraryAt(adapter.appCount()) && footer != null
-                && footer.itemView.findViewById(R.id.btnLibrary) != null
-                && footer.itemView.findViewById(R.id.btnLibrary).hasFocus();
+                && footer.itemView.hasFocus();
         // Capture the app before rebinding can move focus and overwrite its key.
         final String returnKey = lastFocusedKey;
         final int returnSlot = lastFocused;
@@ -1347,6 +1347,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** Re-reads the theme and repaints everything. Preview uses this with unsaved tokens. */
     void applyTheme(Tokens t) {
+        adapter.setDark(isDarkVariant());
         skin.retheme(t);
         skin.applyScreen(this, root);
         glass.retheme(t);
@@ -1433,13 +1434,29 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         focusTile(Math.min(lastRow + lastFocused % COLUMNS, adapter.appCount() - 1));
     }
 
+    /** The footer button focus lands on: the library when it is enabled, otherwise the theme toggle. */
+    private static View footerButton(View footerRow) {
+        View library = footerRow.findViewById(R.id.btnLibrary);
+        return library.getVisibility() == View.VISIBLE ? library : footerRow.findViewById(R.id.btnTheme);
+    }
+
+    /** Pins the other variant of the current theme (dark/light) and remembers it. */
+    @Override public void onThemeToggle() {
+        store.select(store.themeId(), false, isDarkVariant() ? VariantResolver.LIGHT : VariantResolver.DARK);
+        applyTheme(store.current(isNightMode()));
+    }
+
+    private boolean isDarkVariant() {
+        return store.followSystem() ? isNightMode() : VariantResolver.DARK.equals(store.pinnedVariant());
+    }
+
     private void focusLibrary() {
         cancelPendingFocusScroll();
         int position = adapter.appCount();
         if (!adapter.isLibraryAt(position)) return;
         RecyclerView.ViewHolder holder = grid.findViewHolderForAdapterPosition(position);
         if (holder != null) {
-            View button = holder.itemView.findViewById(R.id.btnLibrary);
+            View button = footerButton(holder.itemView);
             Rect visible = new Rect();
             if (button.getGlobalVisibleRect(visible) && visible.height() >= button.getHeight()) {
                 if (button.requestFocus()) libraryFocusPending = false;
@@ -1452,7 +1469,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 if (appLibrary != null || !hasWindowFocus()) return;
                 RecyclerView.ViewHolder footer = grid.findViewHolderForAdapterPosition(adapter.appCount());
                 if (footer != null && adapter.isLibraryAt(adapter.appCount())
-                        && footer.itemView.findViewById(R.id.btnLibrary).requestFocus()) libraryFocusPending = false;
+                        && footerButton(footer.itemView).requestFocus()) libraryFocusPending = false;
             });
             return;
         }
@@ -1463,7 +1480,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 if (pendingFocusScroll != this) return;
                 pendingFocusScroll = null;
                 RecyclerView.ViewHolder footer = rv.findViewHolderForAdapterPosition(position);
-                if (footer != null && footer.itemView.findViewById(R.id.btnLibrary).requestFocus())
+                if (footer != null && footerButton(footer.itemView).requestFocus())
                     libraryFocusPending = false;
             }
         };
