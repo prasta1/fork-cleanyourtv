@@ -1217,13 +1217,15 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
             cpu = cpuPercent();
         }
-        StringBuilder line = new StringBuilder(cpu >= 0
-                ? getString(R.string.stats_cpu, cpu) : getString(R.string.stats_cpu_unknown));
+        // Android 8+ hides CPU load from apps and some chips have no cpuidle either; then the figure is
+        // left out rather than shown as a dash that never changes.
+        List<String> parts = new ArrayList<>();
+        if (cpu >= 0) parts.add(getString(R.string.stats_cpu, cpu));
         long mem = memAvailableMb();
-        if (mem >= 0) line.append("  ·  ").append(getString(R.string.stats_memory, mem));
+        if (mem >= 0) parts.add(getString(R.string.stats_memory, mem));
         String free = formatGb(Environment.getDataDirectory().getFreeSpace());
-        if (!free.isEmpty()) line.append("  ·  ").append(getString(R.string.stats_storage, free));
-        return line.toString();
+        if (!free.isEmpty()) parts.add(getString(R.string.stats_storage, free));
+        return String.join("  ·  ", parts);
     }
 
     // -1: need another sample. -2: this source cannot be read (Android 9 hides /proc/stat from apps).
