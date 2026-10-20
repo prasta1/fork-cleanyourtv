@@ -32,6 +32,8 @@ import androidx.dynamicanimation.animation.SpringForce;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.gathin.tvhome.theme.Skin;
+
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +49,7 @@ final class AppLibraryDialog {
     private final Runnable changed;
     private final LinearLayout panel;
     private final boolean reducedMotion;
+    private final Skin skin;
     private final boolean animations;
     private final boolean rtl;
     private TextView instructions;
@@ -108,8 +111,9 @@ final class AppLibraryDialog {
         if (popup.isShowing()) popup.update(width, height);
     }
 
-    AppLibraryDialog(Activity activity, boolean animations, boolean reducedMotion, Predicate<String> onHome, Runnable changed, Runnable dismissed) {
+    AppLibraryDialog(Activity activity, Skin skin, boolean animations, boolean reducedMotion, Predicate<String> onHome, Runnable changed, Runnable dismissed) {
         this.activity = activity;
+        this.skin = skin;
         this.animations = animations;
         this.rtl = activity.getResources().getBoolean(R.bool.rtl_app_grid);
         this.reducedMotion = reducedMotion;
@@ -257,6 +261,7 @@ final class AppLibraryDialog {
         list.setAdapter(new Catalog());
         shelf.addView(list, new FrameLayout.LayoutParams(-1, -1));
         highlight = new GlassView(activity, null);
+        highlight.retheme(skin.tokens());
         highlight.setRadius(dp(20));
         highlight.setAlpha(0f);
         highlight.setFocusable(false);
@@ -354,6 +359,7 @@ final class AppLibraryDialog {
         String pkg = selectedPackage;
         if (spring != null) spring.cancel();
         View menuPanel = activity.getLayoutInflater().inflate(R.layout.popup_inputs, panel, false);
+        menuPanel.setBackground(skin.panelBackground());
         LinearLayout rows = menuPanel.findViewById(R.id.rows);
         PopupWindow menu = new PopupWindow(menuPanel, dp(220), ViewGroup.LayoutParams.WRAP_CONTENT, true);
         actionPopup = menu;
@@ -406,6 +412,7 @@ final class AppLibraryDialog {
 
     private void addAction(LinearLayout rows, int label, Runnable action) {
         View row = activity.getLayoutInflater().inflate(R.layout.item_input, rows, false);
+        skin.applyInputRow(row);
         ((TextView) row.findViewById(R.id.title)).setText(label);
         row.setFocusableInTouchMode(true);
         row.findViewById(R.id.icon).setVisibility(View.GONE);
