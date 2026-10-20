@@ -351,7 +351,11 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (isLibraryAt(position)) return;
+        if (isLibraryAt(position)) {
+            // The library row is not part of the main screen, so Skin.applyScreen never reaches its button.
+            skin.applyPill(holder.itemView.findViewById(R.id.btnLibrary));
+            return;
+        }
         Holder h = (Holder) holder;
         Entry e = items.get(position);
         // Recycled views keep their old colours unless every bind re-applies the active theme.

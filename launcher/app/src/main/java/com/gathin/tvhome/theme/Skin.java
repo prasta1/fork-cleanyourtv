@@ -137,7 +137,7 @@ public final class Skin {
         }
     }
 
-    private void applyPill(TextView pill) {
+    public void applyPill(TextView pill) {
         if (pill == null) return;
         pill.setBackground(own(pillBackground));
         pill.setTextColor(pillText);
