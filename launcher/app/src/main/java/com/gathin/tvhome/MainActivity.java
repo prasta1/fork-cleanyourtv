@@ -597,6 +597,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (rebuildOnResume) {
             tilesReady = false;
             reloadApps(true);
+        } else if (!glassShown) {
+            // Paused without being stopped (a system overlay): the tile kept focus, so nothing re-shows the glass.
+            View focused = getCurrentFocus();
+            if (focused != null && focused.getId() == R.id.card) onTileFocused(lastFocused, focused);
         }
         rebuildOnResume = false;
         updateGreeting();
@@ -696,6 +700,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         super.onPause();
         endReorder();   // Home or another app while reordering keeps the order so far
         stopAmbientAnimation();
+        // Fade the glass before the launch: the tile un-focuses as the window loses focus, and the glass
+        // drifted off it for a moment.
+        hideGlass();
         heroName.animate().cancel();
         ambient.animate().cancel();
         picker.cancel();                  // a preview must not outlive the screen it was shown on
