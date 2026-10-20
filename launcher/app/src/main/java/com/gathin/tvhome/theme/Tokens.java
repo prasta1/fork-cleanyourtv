@@ -199,8 +199,9 @@ public final class Tokens {
     }
 
     /**
-     * One text style: a size, a variable-font weight and a letter spacing. The weight maps to
-     * {@code fontVariationSettings}, so weights stay real weights rather than faux bold.
+     * One text style: a size, a variable-font weight and a letter spacing. The weight picks one of
+     * the pre-built Outfit families (200, 300, 400, 500; the nearest wins), so weights stay real
+     * weights rather than faux bold.
      */
     public static final class TypeSpec {
         public final float sizeSp;

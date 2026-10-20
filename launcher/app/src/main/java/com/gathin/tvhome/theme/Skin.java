@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +37,16 @@ import com.gathin.tvhome.R;
 public final class Skin {
 
     private final float density;
+    private final Context ctx;
+    /**
+     * One Typeface per weight, built once. Setting fontVariationSettings on each view rebuilds the
+     * variable font every time (about 10 ms per view on a TV CPU), which stalls tile binds.
+     */
+    private final SparseArray<Typeface> typefaces = new SparseArray<>();
+    /** res/font families, each a pre-built weight of Outfit; applyType snaps to the nearest. */
+    private static final int[] WEIGHTS = {200, 300, 400, 500};
+    private static final int[] WEIGHT_FONTS = {
+            R.font.outfit_extralight, R.font.outfit_light, R.font.outfit_regular, R.font.outfit_medium};
 
     private Tokens tokens = Defaults.tokens();
 
@@ -53,6 +65,7 @@ public final class Skin {
     private static final int[] NOT_FOCUSED = new int[]{};
 
     public Skin(Context ctx) {
+        this.ctx = ctx;
         density = ctx.getResources().getDisplayMetrics().density;
         build();
     }
@@ -230,9 +243,26 @@ public final class Skin {
      * Size, weight and tracking. The weight goes through {@code fontVariationSettings} so the
      * variable font renders a real weight rather than a synthesised bold.
      */
+    /**
+     * The typeface for a weight. Only the weights in WEIGHTS exist as font families, so a theme asking
+     * for another (600, 700) gets the nearest one. Add a res/font family and an entry above to widen it.
+     */
+    private Typeface typeface(int weight) {
+        int best = 0;
+        for (int i = 1; i < WEIGHTS.length; i++) {
+            if (Math.abs(WEIGHTS[i] - weight) < Math.abs(WEIGHTS[best] - weight)) best = i;
+        }
+        Typeface t = typefaces.get(WEIGHTS[best]);
+        if (t == null) {
+            t = ctx.getResources().getFont(WEIGHT_FONTS[best]);
+            typefaces.put(WEIGHTS[best], t);
+        }
+        return t;
+    }
+
     public void applyType(TextView v, Tokens.TypeSpec spec) {
         v.setTextSize(TypedValue.COMPLEX_UNIT_SP, spec.sizeSp);
-        v.setFontVariationSettings("'wght' " + spec.weight);
+        v.setTypeface(typeface(spec.weight));
         v.setLetterSpacing(spec.tracking);
     }
 
