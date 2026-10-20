@@ -47,6 +47,9 @@ public final class Skin {
     private Drawable statusDot;
 
     private static final int[] FOCUSED = new int[]{android.R.attr.state_focused};
+    private static final int[] ACTIVATED = new int[]{android.R.attr.state_activated};
+    /** Reorder button while reorder mode is on: not themed, it matches MainActivity.REORDER_ACCENT. */
+    private static final int REORDER_FILL = 0x596EC1FF, REORDER_STROKE = 0xFF6EC1FF;
     private static final int[] NOT_FOCUSED = new int[]{};
 
     public Skin(Context ctx) {
@@ -72,6 +75,11 @@ public final class Skin {
 
         StateListDrawable pill = new StateListDrawable();
         pill.addState(FOCUSED, solid(tokens.pillFocusFill, pillRadius));
+        GradientDrawable pillActive = new GradientDrawable();
+        pillActive.setColor(REORDER_FILL);
+        pillActive.setCornerRadius(pillRadius);
+        pillActive.setStroke(Math.max(1, Math.round(dp(1.5f))), REORDER_STROKE);
+        pill.addState(ACTIVATED, pillActive);
         GradientDrawable pillRest = new GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 new int[]{tokens.pillFillTop, tokens.pillFillBottom});
@@ -118,11 +126,13 @@ public final class Skin {
         text(root, R.id.clock, tokens.textClock, tokens.clock);
         text(root, R.id.ampm, tokens.textAmPm, tokens.amPm);
         text(root, R.id.date, tokens.textDate, tokens.date);
+        text(root, R.id.shamsiDate, tokens.textDate, tokens.date);
+        text(root, R.id.stats, tokens.textDate, tokens.date);
 
         View divider = root.findViewById(R.id.clockDivider);
         if (divider != null) divider.setBackgroundColor(tokens.clockDivider);
 
-        for (int id : new int[]{R.id.btnInputs, R.id.btnWifi, R.id.btnSettings}) {
+        for (int id : new int[]{R.id.btnInputs, R.id.btnWifi, R.id.btnReorder, R.id.btnSettings}) {
             applyPill(root.findViewById(id));
         }
     }
@@ -137,6 +147,11 @@ public final class Skin {
         int height = Math.round(dp(tokens.pillHeight));
         if (lp.height != height) {
             lp.height = height;
+            pill.setLayoutParams(lp);
+        }
+        // An icon-only pill (TopButtonIcon) has a fixed width: keep it a circle at the themed height.
+        if (lp.width > 0 && lp.width != height) {
+            lp.width = height;
             pill.setLayoutParams(lp);
         }
     }
