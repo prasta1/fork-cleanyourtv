@@ -382,3 +382,36 @@ Finally, the chat review claimed the token list was derived from the existing co
 compiled by eye. `TokensTest.tokenCountMatchesTheDocumentedSet` plus a mechanical extraction of
 every colour literal in `res/` and `java/` now back that claim, and the count assertion fails the
 build whenever a token is added or removed so this table cannot quietly drift again.
+
+## Addendum, 2026-10-20: screens added by the upstream sync
+
+Merging upstream `cleanyourtv` v2.3.0 brought in screens that did not exist when this spec was
+written. The spec's goal (a theme changes the whole look) covers them, but its inventory and the
+plan's screenshot checks did not, so they are scoped here.
+
+### In scope: themed through the existing tokens
+
+No new tokens. Each screen reuses the role it already looks like, so `TokensTest`'s count stays put.
+
+| Screen | Files | Reuses |
+|---|---|---|
+| Quick settings | `QuickSettingsActivity`, `activity_quick_settings.xml` | `panel*` fill, stroke and radius; `pill` type and colours |
+| Cards prompt and list | `dialog_card_prompt.xml`, `popup_cards.xml`, `item_card_row.xml` | `panel*`; `inputRow*` for the rows |
+| App library dialog | `AppLibraryDialog` | `panel*`; `inputRow*` |
+| Hebrew (RTL) variants | `layout-iw/` | The same colours as their LTR twins |
+
+The drawables these screens use today (`glass_panel`, `input_row_bg`, `pill_text`, `pill_text_dim`,
+`status_dot`) were restored during the sync only so they would keep working. The work is complete when
+nothing in `res/` or `java/` references them and they are deleted again, as plan task 8 did.
+
+### Still out of scope
+
+- The reorder button's active state (`#6EC1FF`) stays a fixed colour: it matches `MainActivity.REORDER_ACCENT`,
+  a mode indicator rather than part of the visual identity.
+- Festival accents and the sky, clock-dream and petal views. They are decoration with their own palettes.
+- The non-goals above still apply.
+
+### Verification
+
+Install, then screenshot each in-scope screen under `tvos-black` and `daylight`, dark and light. A
+white-on-white or dark-on-dark failure on `daylight` is the thing to look for.
