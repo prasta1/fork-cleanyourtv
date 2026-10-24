@@ -1,8 +1,10 @@
 package com.gathin.tvhome;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
@@ -70,7 +72,15 @@ public class HomeKeyService extends AccessibilityService {
                 PackageManager pm = getPackageManager();
                 Intent launch = pm.getLeanbackLaunchIntentForPackage(appPackage);
                 if (launch == null) launch = pm.getLaunchIntentForPackage(appPackage);
-                if (launch != null) startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                if (launch != null) {
+                    // Launched from a service there is no source window, so the system would play its own
+                    // open animation over Home; use the one tile launches use.
+                    Config cfg = Config.load(this);
+                    Bundle options = cfg.animations && cfg.advancedEffects
+                            ? ActivityOptions.makeCustomAnimation(this, R.anim.app_open_enter, R.anim.app_open_exit).toBundle()
+                            : null;
+                    startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), options);
+                }
                 else Log.w("TvHome.Keys", "App not installed: " + appPackage);
             }
             return true;
