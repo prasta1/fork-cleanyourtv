@@ -56,6 +56,16 @@
          with `tools/tv.py 'logcat -v time -s InputReader:D'` while pressing the button. Leave empty to omit. -->
     <integer-array name="settings_key_keycodes">
     </integer-array>
+    <!-- App buttons on the remote (Netflix, YouTube, ...), as "keycode=package". The stock launcher launched these
+         from its own broadcast receiver; with it disabled the buttons do nothing until HomeKeyService
+         (HOME_KEY_SERVICE=1) starts the app itself. TCL G08 remote: 4062 Netflix, 190 YouTube, 4099 Prime Video,
+         4160 Apple TV. Find your keycodes with the InputReader command above. Leave empty to omit. -->
+    <string-array name="app_key_shortcuts" translatable="false">
+        <item>4062=com.netflix.ninja</item>
+        <item>190=com.google.android.youtube.tv</item>
+        <item>4099=com.amazon.amazonvideo.livingroom</item>
+        <item>4160=com.apple.atve.androidtv.appletv</item>
+    </string-array>
     <!-- What those Settings buttons open: false, the TV's Settings; true, a small glass panel at the top right
          with TV settings, Display, Network, Apps (re-enable an app) and Launcher settings, over whatever is on screen.
          Both keys can also be set from a theme's config.json ("settings_key_keycodes": [83]). -->
