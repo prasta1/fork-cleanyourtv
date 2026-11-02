@@ -1,0 +1,52 @@
+# TCL A1 projector (reports as "SmartProjector", device himalaya, made by SDMC, MediaTek), Google TV on
+# Android 11 (SDK 30), build TCL/TCL_SmartProjector/himalaya:11/RTM9.241015.098 release-keys.
+#
+# NOT YET APPLIED: list drawn up from `pm list packages` over network adb on 2026-11-02. Apply, live
+# with it for a few days, then delete this line.
+#
+# Apply:   TV_HOST=<projector ip> tools/disable.sh examples/tcl-a1-projector/debloat.txt
+# Undo:    TV_HOST=<projector ip> tools/restore.sh examples/tcl-a1-projector/debloat.txt
+# Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
+#
+# Connecting: the Developer options page only offers "USB debugging", but turning it on opens classic
+# network adb on port 5555 (no pairing, no Wireless debugging toggle). `tools/tv.py --probe` works as is.
+#
+# Stock launcher: com.google.android.apps.tv.launcherx. Only one HDMI port is registered (HW4, port 1).
+# This is a MediaTek/SDMC build: there are no com.tcl.* packages, so the TCL TV lists do not apply.
+#
+# Already disabled from the factory (nothing to do): all 15 uk.co.freeview.* apps (Freeview Play UK).
+#
+# DO NOT DISABLE (HDMI input, TV framework, remote and Bluetooth):
+# com.mediatek.tvinput                 # HDMI input service
+# com.mediatek.tv.service              # TV framework
+# com.mediatek.wwtv.tvcenter           # TV center / source panel
+# com.mediatek.network                 # network service
+# com.sdmc.service                     # core SDMC system service
+# com.sdmc.remotecontrolservice        # remote key handling
+# com.sdmc.bluetoothconnect            # Bluetooth remote pairing
+# com.sdmc.bluetoothspeaker            # Bluetooth speaker mode
+# com.sdmc.kt                          # system app, purpose unclear: kept
+# com.sdmc.implayer                    # SDMC media player, purpose unclear: kept
+# com.mediatek.tv.freeviewplay         # Freeview Play, still enabled: kept until its dependents are understood
+# com.mediatek.wwtv.setupwizard        # setup wizards can hold Home or provisioning
+# com.mediatek.wwtv.webview            # WebView for TV center
+# com.google.android.tungsten.setupwraith  # Google TV setup wizard
+
+# Preinstalled apps and ads
+com.hulu.livingroomplus
+com.tubitv
+com.haystack.android                   # Haystack News
+com.instagram.airwave
+com.disney.disneyplus
+com.google.android.youtube.tvunplugged # YouTube TV
+
+# Factory and test tools
+com.sdmc.sdmcfactory
+com.dangs.factorytest
+mediatek.factorymenu.ui
+com.sdmc.keyburn                       # key burn-in tool
+
+# Google extras (off by choice)
+com.google.android.feedback
+com.google.android.play.games
+com.google.android.youtube.tvmusic
