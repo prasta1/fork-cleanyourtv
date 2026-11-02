@@ -33,12 +33,12 @@
 # com.google.android.tungsten.setupwraith  # Google TV setup wizard
 
 # Preinstalled apps and ads
-com.hulu.livingroomplus
-com.tubitv
+# com.hulu.livingroomplus
+# com.tubitv
 com.haystack.android                   # Haystack News
 com.instagram.airwave
-com.disney.disneyplus
-com.google.android.youtube.tvunplugged # YouTube TV
+# com.disney.disneyplus
+# com.google.android.youtube.tvunplugged # YouTube TV
 
 # Factory and test tools
 com.sdmc.sdmcfactory
