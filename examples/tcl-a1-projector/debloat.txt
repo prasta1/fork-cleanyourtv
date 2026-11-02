@@ -35,8 +35,7 @@
 # Preinstalled apps and ads
 # com.hulu.livingroomplus
 # com.tubitv
-com.haystack.android                   # Haystack News
-com.instagram.airwave
+# com.haystack.android                   # Haystack News
 # com.disney.disneyplus
 # com.google.android.youtube.tvunplugged # YouTube TV
 
