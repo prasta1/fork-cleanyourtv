@@ -1,0 +1,104 @@
+# TCL Smart TV Pro (device G08), Google TV / Android 14 (SDK 34)
+# Firmware tcl9618-user 14 UTT2.250416.001 AU14 release-keys. MediaTek platform.
+#
+# Apply:   TV_HOST=<tv ip> TV_PORT=<port> tools/disable.sh examples/tcl-smart-tv-pro/debloat.txt
+# Undo:    TV_HOST=<tv ip> TV_PORT=<port> tools/restore.sh examples/tcl-smart-tv-pro/debloat.txt
+# Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
+#
+# This TV needs the Android 11+ wireless-debugging port (shown in Developer options),
+# not the old 5555. Pair once from Settings -> Developer options -> Wireless debugging
+# -> Pair device with pairing code, then pass that port as TV_PORT.
+#
+# 38 packages, applied 7 November 2026. Streaming apps,
+# casting, voice search and firmware updates were all deliberately kept, so this
+# is a conservative first pass rather than a maximal one.
+#
+# Known limits:
+#   - Google TV's home feed (the "Sponsored" slot and "Top picks for you") is baked
+#     into com.google.android.apps.tv.launcherx and cannot be disabled on Android 14.
+#     Neither com.google.android.tvrecommendations nor
+#     com.google.android.leanbacklauncher.recommendations exist on this platform.
+#     Replacing the launcher is the only way to remove them.
+#   - Disabling com.tcl.tv removes TCL's own promo layer but exposes Google's feed
+#     underneath, so it is not listed here.
+#   - com.tcl.browser and com.tcl.systemui.plugin were already disabled on this
+#     firmware before any of this, so they are not listed either. With
+#     com.tcl.browser gone the launcher can show a "BrowseHere" placeholder tile.
+
+# Retail / showroom modes. These are the big wins: TCL ships them so the set runs
+# an attract loop on the shop floor. "Exhibit" is a screensaver demo; "tv.plus" is a
+# waterfall promo content page. "Suspension" is NOT a demo: it is the input/source menu,
+# so with it off the remote's Input button needs "handle_view_inputs": true in config.json.
+com.tcl.exhibit
+com.tcl.suspension
+com.tcl.tv.plus
+com.tcl.ocean.instructions
+com.tcl.dashboard
+com.tcl.channelplus
+com.tcl.ui_mediaCenter
+
+# TCL telemetry, logging and partner/ad plumbing
+# (com.tcl.providers.config is deliberately absent: see the warning at the end)
+com.tcl.logkit
+com.tcl.esticker
+com.tcl.partnercustomizer
+com.tcl.smartlink.core
+com.tcl.android.webview
+
+# Setup wizards and onboarding leftovers
+com.tcl.hotelmenu                  # hotel mode, only useful for display panels
+com.tcl.useragreement
+com.tcl.messagebox
+com.tcl.interactive
+com.tcl.gamebar
+com.tcl.autopair
+com.tcl.t_solo                     # "listen alone" Bluetooth pairing helper
+
+# Google: ad frameworks, feedback and setup wizards
+com.google.android.partnersetup    # the ad one
+com.google.android.onetimeinitializer
+com.google.android.tungsten.setupwraith   # Google TV first-run wizard
+com.google.android.feedback
+com.google.android.play.games
+com.google.android.apps.mediashell
+com.google.android.apps.tv.dreamx # Google TV screensaver
+com.google.android.syncadapters.calendar
+
+# Android 14 ad and privacy services, TCL home push, Alexa stub, print and feedback leftovers,
+# Play Movies (from upstream's tcl-g08-us-google-tv list, 8 of its 9 not already here)
+com.android.adservices.api
+com.android.federatedcompute.services
+com.android.ondevicepersonalization.services
+com.tcl.tv.tclhome_passive
+com.tcl.smartalexa
+com.android.printspooler
+com.android.tv.feedbackconsent
+com.google.android.videos
+
+# MediaTek background services
+com.mediatek.speakerservice
+com.mediatek.backgrounddetection
+com.mediatek.support.webview
+
+# ---------------------------------------------------------------------------
+# Deliberately NOT disabled on this TV:
+#   com.google.android.ext.services                                        core Android: tools/disable.sh refuses it
+#   com.tcl.airplay2, com.mediatek.airplaydaemon, com.mediatek.AirplayAPK  casting
+#   com.tcl.UpdatePeripheral                                               firmware updates
+#   com.tcl.tvinput                                                        Live TV tuner
+#   com.tcl.systemserver, com.tcl.globalkeyoverlay                         remote keys break subtly
+#   com.google.android.katniss, com.google.android.tts                     voice search
+#   com.google.android.inputmethod.latin                                   on-screen keyboard
+#   com.mediatek.network, com.tailscale.ipn                                networking
+#   com.tcl.tv, com.tcl.usercenter, com.tcl.hearaid                        plausible everyday use
+#
+# Do NOT disable these three on a TCL. Disabling them dropped the TV's Wi-Fi
+# connection outright and it took a re-pair over ADB to get back in:
+#
+#   com.tcl.providers.config    network / Wi-Fi provider configuration
+#   com.tcl.initsetup           setup wizard, owns first-run provisioning
+#   com.tcl.factory.view        factory wizard, same role
+#
+# The first one is the likely culprit but all three were re-enabled together,
+# so treat the set as load-bearing rather than bisecting on a live TV.
+# ---------------------------------------------------------------------------
