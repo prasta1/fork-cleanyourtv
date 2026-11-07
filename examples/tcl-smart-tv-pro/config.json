@@ -5,6 +5,7 @@
   ],
   "app_keys": [
     "4001:com.tcl.tv/com.tcl.player.TVActivity",
+    "83:settings",
     "4062:com.netflix.ninja",
     "190:com.google.android.youtube.tv",
     "4099:com.amazon.amazonvideo.livingroom",
