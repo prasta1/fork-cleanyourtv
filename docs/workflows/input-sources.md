@@ -34,3 +34,6 @@ stay, as long as they are visible.
 
 Keys: `input_action`, `input_sources` and `app_keys` entries of the form `input:<input id>` are described in
 [`themes/README.md`](../../themes/README.md).
+
+*Fork note:* this fork has only `input_action` so far. `input_sources` and `app_keys` come from upstream
+and are not here yet; app buttons use `app_key_shortcuts` in `config.xml` (package names only).
