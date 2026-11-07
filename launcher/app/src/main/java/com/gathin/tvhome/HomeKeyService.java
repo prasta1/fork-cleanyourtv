@@ -2,6 +2,8 @@ package com.gathin.tvhome;
 
 import android.accessibilityservice.AccessibilityService;
 import android.app.ActivityOptions;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -70,7 +72,10 @@ public class HomeKeyService extends AccessibilityService {
         if (appPackage != null) {
             if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()) {
                 PackageManager pm = getPackageManager();
-                Intent launch = pm.getLeanbackLaunchIntentForPackage(appPackage);
+                // "package/.Activity" opens that activity; a bare package opens its launcher entry.
+                ComponentName component = ComponentName.unflattenFromString(appPackage);
+                Intent launch = component != null ? Intent.makeMainActivity(component)
+                        : pm.getLeanbackLaunchIntentForPackage(appPackage);
                 if (launch == null) launch = pm.getLaunchIntentForPackage(appPackage);
                 if (launch != null) {
                     // Launched from a service there is no source window, so the system would play its own
@@ -79,7 +84,11 @@ public class HomeKeyService extends AccessibilityService {
                     Bundle options = cfg.animations && cfg.advancedEffects
                             ? ActivityOptions.makeCustomAnimation(this, R.anim.app_open_enter, R.anim.app_open_exit).toBundle()
                             : null;
-                    startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), options);
+                    try {
+                        startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), options);
+                    } catch (ActivityNotFoundException e) {
+                        Log.w("TvHome.Keys", "Activity not found (disabled?): " + appPackage);
+                    }
                 }
                 else Log.w("TvHome.Keys", "App not installed: " + appPackage);
             }

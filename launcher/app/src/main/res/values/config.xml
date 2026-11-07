@@ -59,8 +59,11 @@
     <!-- App buttons on the remote (Netflix, YouTube, ...), as "keycode=package". The stock launcher launched these
          from its own broadcast receiver; with it disabled the buttons do nothing until HomeKeyService
          (HOME_KEY_SERVICE=1) starts the app itself. TCL G08 remote: 4062 Netflix, 190 YouTube, 4099 Prime Video,
-         4160 Apple TV. Find your keycodes with the InputReader command above. Leave empty to omit. -->
+         4160 Apple TV. Find your keycodes with the InputReader command above. Leave empty to omit.
+         A value can also be "package/.Activity" to open one activity: the TCL G08 TV button (4001) opens Live TV
+         that way, because TCL's own key handler swallows it and com.tcl.tv's launcher entry is not TVActivity. -->
     <string-array name="app_key_shortcuts" translatable="false">
+        <item>4001=com.tcl.tv/com.tcl.player.TVActivity</item>
         <item>4062=com.netflix.ninja</item>
         <item>190=com.google.android.youtube.tv</item>
         <item>4099=com.amazon.amazonvideo.livingroom</item>
