@@ -114,6 +114,9 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   package that also claims HOME (PatchWall on Xiaomi) makes Android drop the default. The install
   script now picks the known stock launcher among the candidates by itself; otherwise choose one on
   the TV or pass `STOCK_LAUNCHER=<package>`.
+- **The Sponsored slot on Google TV cannot be debloated.** On Android 12 and newer it lives inside
+  the launcher app rather than in a recommendation service, so the `tvrecommendations` packages that
+  disable it on older Google TV builds do not exist here. Replacing the launcher is the only route.
 
 ## Accessibility helper enabled but the remote button does nothing
 
