@@ -1,0 +1,13 @@
+{
+  "handle_view_inputs": true,
+  "hidden_apps": [
+    "com.tcl.tv"
+  ],
+  "app_keys": [
+    "4001:com.tcl.tv/com.tcl.player.TVActivity",
+    "4062:com.netflix.ninja",
+    "190:com.google.android.youtube.tv",
+    "4099:com.amazon.amazonvideo.livingroom",
+    "4160:com.apple.atve.androidtv.appletv"
+  ]
+}
