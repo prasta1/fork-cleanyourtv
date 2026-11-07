@@ -1,8 +1,15 @@
 package com.gathin.tvhome;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.ActivityOptions;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
+import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 
@@ -21,10 +28,21 @@ public class HomeKeyService extends AccessibilityService {
     private int[] settingsScancodes = new int[0];
     private int[] settingsKeycodes = new int[0];
     private boolean settingsPanel;
+    /** App buttons: remote keycode to the package it should open (config.xml, app_key_shortcuts). */
+    private final SparseArray<String> appKeys = new SparseArray<>();
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
+        appKeys.clear();
+        for (String entry : getResources().getStringArray(R.array.app_key_shortcuts)) {
+            String[] parts = entry.split("=", 2);
+            try {
+                if (parts.length == 2) appKeys.put(Integer.parseInt(parts[0].trim()), parts[1].trim());
+            } catch (NumberFormatException e) {
+                Log.w("TvHome.Keys", "Ignoring app_key_shortcuts entry: " + entry);
+            }
+        }
         settingsScancodes = getResources().getIntArray(R.array.settings_key_scancodes);
         // Keycodes and the panel choice can also come from a theme; theme.sh restarts this service.
         Config config = Config.load(this);
@@ -47,6 +65,32 @@ public class HomeKeyService extends AccessibilityService {
                 Intent open = settingsPanel ? new Intent(this, QuickSettingsActivity.class)
                         : new Intent(Settings.ACTION_SETTINGS);
                 startActivity(open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            }
+            return true;
+        }
+        String appPackage = appKeys.get(event.getKeyCode());
+        if (appPackage != null) {
+            if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()) {
+                PackageManager pm = getPackageManager();
+                // "package/.Activity" opens that activity; a bare package opens its launcher entry.
+                ComponentName component = ComponentName.unflattenFromString(appPackage);
+                Intent launch = component != null ? Intent.makeMainActivity(component)
+                        : pm.getLeanbackLaunchIntentForPackage(appPackage);
+                if (launch == null) launch = pm.getLaunchIntentForPackage(appPackage);
+                if (launch != null) {
+                    // Launched from a service there is no source window, so the system would play its own
+                    // open animation over Home; use the one tile launches use.
+                    Config cfg = Config.load(this);
+                    Bundle options = cfg.animations && cfg.advancedEffects
+                            ? ActivityOptions.makeCustomAnimation(this, R.anim.app_open_enter, R.anim.app_open_exit).toBundle()
+                            : null;
+                    try {
+                        startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), options);
+                    } catch (ActivityNotFoundException e) {
+                        Log.w("TvHome.Keys", "Activity not found (disabled?): " + appPackage);
+                    }
+                }
+                else Log.w("TvHome.Keys", "App not installed: " + appPackage);
             }
             return true;
         }

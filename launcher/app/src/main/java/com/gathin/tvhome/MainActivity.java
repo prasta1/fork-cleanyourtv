@@ -93,6 +93,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private static final int LAUNCHER_SETTINGS_REQUEST = 42;
     /** Sent by QuickSettingsActivity: open Launcher settings from here so Home rebuilds when they close. */
     static final String ACTION_LAUNCHER_SETTINGS = "com.gathin.tvhome.action.LAUNCHER_SETTINGS";
+    /** Sent by InputKeyService when no system app answers the remote's Input button: open the Inputs menu. */
+    static final String ACTION_SHOW_INPUTS = "com.gathin.tvhome.action.SHOW_INPUTS";
+    private boolean showInputsOnResume;
     /** Tiles per row and dock slots (res/values/config.xml, columns). Set in onCreate. */
     static int COLUMNS = 4;
     private boolean rtlAppGrid;
@@ -568,6 +571,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (openLauncherSettingsIfAsked(intent)) return;
+        if (intent != null && ACTION_SHOW_INPUTS.equals(intent.getAction())) {
+            showInputsOnResume = true;   // onResume follows; the menu needs the window shown first
+            return;
+        }
         if (intent == null || !intent.hasCategory(Intent.CATEGORY_HOME)) return;
         grid.scrollToPosition(0);
         lastFocused = 0;
@@ -597,11 +604,19 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (rebuildOnResume) {
             tilesReady = false;
             reloadApps(true);
+        } else if (!glassShown) {
+            // Paused without being stopped (a system overlay): the tile kept focus, so nothing re-shows the glass.
+            View focused = getCurrentFocus();
+            if (focused != null && focused.getId() == R.id.card) onTileFocused(lastFocused, focused);
         }
         rebuildOnResume = false;
         updateGreeting();
         updateWifiLabel();
         updateInputsButton();
+        if (showInputsOnResume) {
+            showInputsOnResume = false;
+            if (btnInputs.getVisibility() == View.VISIBLE) btnInputs.post(this::showInputs);
+        }
         if (showStats) startStats();
         sky.update();
         handler.postDelayed(minuteTick, MINUTE_MS);
@@ -696,6 +711,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         super.onPause();
         endReorder();   // Home or another app while reordering keeps the order so far
         stopAmbientAnimation();
+        // Fade the glass before the launch: the tile un-focuses as the window loses focus, and the glass
+        // drifted off it for a moment.
+        hideGlass();
         heroName.animate().cancel();
         ambient.animate().cancel();
         picker.cancel();                  // a preview must not outlive the screen it was shown on

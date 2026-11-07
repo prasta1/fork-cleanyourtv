@@ -18,11 +18,15 @@ public class InputKeyService extends AccessibilityService {
 
     @Override
     protected boolean onKeyEvent(KeyEvent event) {
-        if (event.getKeyCode() != KeyEvent.KEYCODE_TV) return false;
+        // KEYCODE_TV_INPUT: TCL Google TV remotes (Vendor_0417_Product_0304.kl maps usage 0x0c0049 to it).
+        if (event.getKeyCode() != KeyEvent.KEYCODE_TV && event.getKeyCode() != KeyEvent.KEYCODE_TV_INPUT) return false;
         if (event.getAction() == KeyEvent.ACTION_UP) {
             try {
                 startActivity(new Intent(ACTION_VIEW_INPUTS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            } catch (ActivityNotFoundException ignored) {
+            } catch (ActivityNotFoundException e) {
+                // The TV's own switcher is disabled (debloated TCL): use the launcher's Inputs menu instead.
+                startActivity(new Intent(MainActivity.ACTION_SHOW_INPUTS).setClass(this, MainActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             }
         }
         return true;
