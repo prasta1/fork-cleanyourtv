@@ -34,10 +34,10 @@ DynamicAnimation, no Kotlin, no Compose, no network. It targets TVs with 1 GB of
   screenshot: `tools/tv.py 'input keyevent KEYCODE_DPAD_DOWN; screencap -p /sdcard/s.png'` then
   `tools/tv.py --pull /sdcard/s.png s.png`. Include a screenshot in your pull request.
 
-Build with `TV_HOST=<ip> launcher/build-and-install.sh` (JDK 17, Android SDK platform 34 and
-build-tools 34.0.0; on macOS `brew install openjdk@17 android-commandlinetools` then
-`sdkmanager "platforms;android-34" "build-tools;34.0.0"`; with the newer command-line tools the form is
-`android sdk install platforms/android-34 build-tools/34.0.0`).
+Build with `TV_HOST=<ip> launcher/build-and-install.sh` (JDK 17, Android SDK platform 37.2 and
+build-tools 37.0.0; on macOS `brew install openjdk@17 android-commandlinetools` then
+`sdkmanager "platforms;android-37.2" "build-tools;37.0.0"`; with the newer command-line tools the form is
+`android sdk install platforms/android-37.2 build-tools/37.0.0`).
 
 Ideas that fit the direction: an idle screensaver with clock and ambient colour, per-TV icon packs
 for apps without banners, a settings screen to edit the dock from the TV, localisation.

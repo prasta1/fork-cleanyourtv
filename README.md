@@ -283,8 +283,8 @@ The install scripts ask the TV which launcher owns Home and only disable one the
 
 A small native Android TV app (`com.gathin.tvhome`, about 370 KB installed) in plain Java with
 AndroidX RecyclerView and nothing heavier. Built for sets with 1 GB of RAM: no blur, no video, no
-network, no background services. It needs JDK 17 and Android SDK platform 34 to build; on macOS,
-`brew install openjdk@17 android-commandlinetools` and `sdkmanager "platforms;android-34" "build-tools;34.0.0"`. On Linux
+network, no background services. It needs JDK 17 and Android SDK platform 37.2 to build; on macOS,
+`brew install openjdk@17 android-commandlinetools` and `sdkmanager "platforms;android-37.2" "build-tools;37.0.0"`. On Linux
 the install script finds `~/Android/Sdk` and the `java` on your PATH.
 
 - **Configure** in [`config.xml`](launcher/app/src/main/res/values/config.xml): dock order, hidden apps, the Live TV package, columns (tiles shrink from 5 up), rows under the dock, an optional VPN app for the network pill, and `reduced_motion` for TVs whose GPU cannot keep up.
