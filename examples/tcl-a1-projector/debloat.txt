@@ -1,8 +1,8 @@
 # TCL A1 projector (reports as "SmartProjector", device himalaya, made by SDMC, MediaTek), Google TV on
 # Android 11 (SDK 30), build TCL/TCL_SmartProjector/himalaya:11/RTM9.241015.098 release-keys.
 #
-# NOT YET APPLIED: list drawn up from `pm list packages` over network adb on 2026-11-02. Apply, live
-# with it for a few days, then delete this line.
+# Drawn up from `pm list packages` over network adb and applied on 2026-11-02. The launcher was not
+# installed: the stock launcher (com.google.android.apps.tv.launcherx) is still enabled.
 #
 # Apply:   TV_HOST=<projector ip> tools/disable.sh examples/tcl-a1-projector/debloat.txt
 # Undo:    TV_HOST=<projector ip> tools/restore.sh examples/tcl-a1-projector/debloat.txt
