@@ -1,5 +1,6 @@
 {
   "handle_view_inputs": true,
+  "home_long_press_home": true,
   "hidden_apps": [
     "com.tcl.tv"
   ],
