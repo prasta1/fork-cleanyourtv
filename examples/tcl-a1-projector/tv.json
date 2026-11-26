@@ -1,0 +1,6 @@
+{
+  "tv": "TCL A1 projector (SmartProjector, himalaya, SDMC, MediaTek)",
+  "os": "Google TV 11",
+  "brand": "TCL",
+  "notes": "Network adb on port 5555 once USB debugging is on, with no Wireless debugging toggle; factory tools, feedback, Play Games and YouTube Music off, Hulu, Tubi, Disney+ and YouTube TV kept; the top-panel buttons send no events at the kernel level, so the Bluetooth remote is the only input"
+}

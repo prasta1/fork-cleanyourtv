@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:background="@drawable/glass_panel"
     android:paddingStart="26dp"
     android:paddingEnd="26dp"
     android:paddingTop="22dp"
@@ -17,23 +18,30 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="end"
-        android:fontFamily="@font/outfit_medium" />
+        android:textColor="#FFFFFFFF"
+        android:textSize="22sp"
+        android:fontFamily="@string/font_medium"
+        android:letterSpacing="-0.01" />
 
     <TextView
         android:id="@+id/body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:textColor="#D9FFFFFF"
+        android:textSize="15sp"
         android:lineSpacingExtra="3sp"
-        android:fontFamily="@font/outfit" />
+        android:fontFamily="@string/font_body" />
 
     <TextView
         android:id="@+id/names"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
+        android:textColor="#D9FFFFFF"
+        android:textSize="15sp"
         android:lineSpacingExtra="3sp"
-        android:fontFamily="@font/outfit" />
+        android:fontFamily="@string/font_body" />
 
     <TextView
         android:id="@+id/hint"
@@ -41,7 +49,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="@string/card_prompt_hint"
-        android:fontFamily="@font/outfit" />
+        android:textColor="#99FFFFFF"
+        android:textSize="13sp"
+        android:fontFamily="@string/font_body" />
 
     <TextView
         android:id="@+id/identity"
@@ -49,7 +59,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:maxLines="2"
-        android:fontFamily="@font/outfit" />
+        android:textColor="#80FFFFFF"
+        android:textSize="12sp"
+        android:letterSpacing="0.03"
+        android:fontFamily="@string/font_body" />
 
     <LinearLayout
         android:layout_width="match_parent"

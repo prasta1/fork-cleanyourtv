@@ -1,0 +1,6 @@
+{
+  "tv": "TCL Smart TV Pro (G08, tcl9618, MediaTek), firmware AU14",
+  "os": "Google TV 14",
+  "brand": "TCL",
+  "notes": "38 packages off, verified on the real remote: Home, HDMI, the Input button through the launcher's Inputs menu (handle_view_inputs), the TV button opening Live TV, the Settings gear (keycode 83) and the Netflix, YouTube, Prime Video and Apple TV buttons; com.tcl.tv hidden from the grid; streaming apps and AirPlay kept"
+}

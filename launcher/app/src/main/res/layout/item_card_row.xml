@@ -8,6 +8,7 @@
     android:paddingEnd="12dp"
     android:paddingTop="7dp"
     android:paddingBottom="8dp"
+    android:background="@drawable/input_row_bg"
     android:focusable="true"
     android:clickable="true">
 
@@ -24,8 +25,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="12dp"
+            android:textColor="@drawable/pill_text"
             android:duplicateParentState="true"
-            android:fontFamily="@font/outfit_medium"
+            android:textSize="15sp"
+            android:fontFamily="@string/font_medium"
             android:singleLine="true"
             android:ellipsize="end" />
 
@@ -33,16 +36,21 @@
             android:id="@+id/state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@drawable/pill_text"
             android:duplicateParentState="true"
-            android:fontFamily="@font/outfit" />
+            android:textSize="11sp"
+            android:fontFamily="@string/font_body"
+            android:letterSpacing="0.04" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/app"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@drawable/pill_text_mid"
         android:duplicateParentState="true"
-        android:fontFamily="@font/outfit"
+        android:textSize="11sp"
+        android:fontFamily="@string/font_body"
         android:singleLine="true"
         android:ellipsize="end" />
 
@@ -50,8 +58,10 @@
         android:id="@+id/pkg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@drawable/pill_text_mid"
         android:duplicateParentState="true"
-        android:fontFamily="@font/outfit"
+        android:textSize="11sp"
+        android:fontFamily="@string/font_body"
         android:singleLine="true"
         android:ellipsize="middle" />
 
@@ -60,7 +70,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
+        android:textColor="@drawable/pill_text_mid"
         android:duplicateParentState="true"
-        android:fontFamily="@font/outfit"
+        android:textSize="10sp"
+        android:letterSpacing="0.03"
+        android:fontFamily="@string/font_body"
         android:maxLines="2" />
 </LinearLayout>

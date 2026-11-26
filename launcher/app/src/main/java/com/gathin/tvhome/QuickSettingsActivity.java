@@ -11,8 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gathin.tvhome.theme.Skin;
-
 /**
  * The panel the remote's Settings button opens when {@code settings_key_panel} is on (HomeKeyService):
  * a few glass rows under the Settings pill, over Home or whatever app is playing. Translucent and in a
@@ -20,22 +18,33 @@ import com.gathin.tvhome.theme.Skin;
  * closes the panel.
  */
 public final class QuickSettingsActivity extends Activity {
+    @Override
+    protected void attachBaseContext(android.content.Context base) {
+        super.attachBaseContext(LauncherLocale.wrap(base));   // locale
+    }
 
-    private Skin skin;
 
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_quick_settings);
-        skin = Skin.forContext(this);
-        findViewById(R.id.panel).setBackground(skin.panelBackground());
+        if (getResources().getBoolean(R.bool.rtl_menu_bar)) {
+            View panel = findViewById(R.id.panel);
+            android.widget.FrameLayout.LayoutParams position =
+                    (android.widget.FrameLayout.LayoutParams) panel.getLayoutParams();
+            position.gravity = android.view.Gravity.TOP | android.view.Gravity.LEFT;
+            int inset = position.getMarginEnd();
+            position.setMarginEnd(0);
+            position.setMargins(inset, position.topMargin, 0, position.bottomMargin);
+            panel.setLayoutParams(position);
+        }
         findViewById(R.id.scrim).setOnClickListener(v -> finish());
         LinearLayout rows = findViewById(R.id.rows);
-        addRow(rows, R.drawable.ic_settings, R.string.tv_settings, 0, new Intent(Settings.ACTION_SETTINGS));
-        addRow(rows, R.drawable.ic_picture, R.string.quick_picture, 0, new Intent(Settings.ACTION_DISPLAY_SETTINGS));
-        addRow(rows, R.drawable.ic_wifi, R.string.quick_network, 0, new Intent(Settings.ACTION_WIFI_SETTINGS));
+        addRow(rows, R.drawable.ic_settings, R.string.tv_settings, 0, SystemSettings.intent(this, Settings.ACTION_SETTINGS));
+        addRow(rows, R.drawable.ic_picture, R.string.quick_picture, 0, SystemSettings.displayIntent(this));
+        addRow(rows, R.drawable.ic_wifi, R.string.quick_network, 0, SystemSettings.intent(this, Settings.ACTION_WIFI_SETTINGS));
         addRow(rows, R.drawable.ic_apps, R.string.quick_apps, R.string.quick_apps_hint,
-                new Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS));
+                SystemSettings.intent(this, Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS));
         // Through Home, so it rebuilds with the new choices when Launcher settings closes.
         addRow(rows, R.drawable.ic_home_settings, R.string.launcher_settings, 0,
                 new Intent(this, MainActivity.class).setAction(MainActivity.ACTION_LAUNCHER_SETTINGS));
@@ -51,6 +60,7 @@ public final class QuickSettingsActivity extends Activity {
 
     /** Anything else taking the screen (Home, an app, a screensaver) closes the panel. */
     @Override
+    @SuppressWarnings("deprecation")
     protected void onPause() {
         super.onPause();
         finish();
@@ -59,7 +69,6 @@ public final class QuickSettingsActivity extends Activity {
 
     private void addRow(LinearLayout rows, int icon, int title, int status, Intent target) {
         View row = getLayoutInflater().inflate(R.layout.item_input, rows, false);
-        skin.applyInputRow(row);
         ((ImageView) row.findViewById(R.id.icon)).setImageResource(icon);
         ((TextView) row.findViewById(R.id.title)).setText(title);
         row.findViewById(R.id.dot).setVisibility(View.GONE);
@@ -69,7 +78,7 @@ public final class QuickSettingsActivity extends Activity {
         row.setOnClickListener(v -> {
             try {
                 startActivity(target.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-            } catch (ActivityNotFoundException e) {
+            } catch (ActivityNotFoundException | SecurityException e) {
                 Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
             }
             finish();
